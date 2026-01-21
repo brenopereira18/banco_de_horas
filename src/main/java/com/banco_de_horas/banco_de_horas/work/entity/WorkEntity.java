@@ -1,4 +1,4 @@
-package com.banco_de_horas.banco_de_horas.service.entity;
+package com.banco_de_horas.banco_de_horas.work.entity;
 
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -17,12 +17,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "servico")
+@Table(name = "trabalho")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ServiceEntity {
+public class WorkEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
