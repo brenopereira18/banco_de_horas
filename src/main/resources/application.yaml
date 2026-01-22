@@ -1,3 +1,48 @@
 spring:
   application:
     name: banco_de_horas
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/annual_leave
+    username: postgres
+    password: 2001
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+    check-template: true
+    check-template-location: true
+    servlet:
+      content-type: text/html
+
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+    livereload:
+      enabled: true
+      port: 35729
+    remote:
+      restart:
+        enabled: true
+
+  web:
+    resources:
+      static-locations: classpath:/static/
+      cache:
+        period: 0
+
+server:
+  port: 8080

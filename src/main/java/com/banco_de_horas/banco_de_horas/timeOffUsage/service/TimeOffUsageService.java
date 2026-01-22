@@ -1,12 +1,13 @@
 package com.banco_de_horas.banco_de_horas.timeOffUsage.service;
 
+import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.entity.UserType;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.TimeOffUsageRequestDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.entity.TimeOffUsageEntity;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.repository.TimeOffUsageRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class TimeOffUsageService {
 
     public TimeOffUsageEntity create(TimeOffUsageRequestDTO dto) {
         TaxEntity tax = taxRepository.findById(dto.taxId())
-            .orElseThrow(() -> new IllegalArgumentException("Fiscal não encontrado"));
+            .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
 
         long daysOff = calculateDaysOff(
             dto.startDateTime(),
@@ -48,7 +49,7 @@ public class TimeOffUsageService {
 
     public TimeOffUsageEntity update(Long id, TimeOffUsageEntity updated) {
         TimeOffUsageEntity existing = timeOffUsageRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Uso de folga não encontrado"));
+            .orElseThrow(() -> new ResourceNotFoundException("Uso de folga não encontrado"));
 
         // Reverte saldo antigo
         restoreTaxBalance(existing);
