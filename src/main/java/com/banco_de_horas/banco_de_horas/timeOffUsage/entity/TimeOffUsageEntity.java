@@ -50,10 +50,11 @@ public class TimeOffUsageEntity {
 
 
     @PrePersist
-    @PreUpdate
-    private void calculateHoursUsed() {
+    private void onCreate() {
         this.registrationDate = LocalDateTime.now();
+    }
 
+    public void calculateHoursUsed() {
         if (startDateTime != null && endDateTime != null) {
             long totalMinutes = Duration.between(startDateTime, endDateTime).toMinutes();
 
