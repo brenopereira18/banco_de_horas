@@ -1,5 +1,6 @@
 package com.banco_de_horas.banco_de_horas.work.service;
 
+import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
 import com.banco_de_horas.banco_de_horas.holiday.repository.HolidayRepository;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
@@ -7,7 +8,7 @@ import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkResponseDTO;
 import com.banco_de_horas.banco_de_horas.work.entity.WorkEntity;
 import com.banco_de_horas.banco_de_horas.work.repository.WorkRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ public class WorkService {
     public WorkResponseDTO create(WorkRequestDTO dto) {
 
         TaxEntity fiscal = taxRepository.findById(dto.taxId())
-            .orElseThrow(() -> new IllegalArgumentException("Fiscal não encontrado"));
+            .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
 
         WorkEntity work = WorkEntity.builder()
             .taxEntity(fiscal)
@@ -65,7 +66,7 @@ public class WorkService {
 
     public WorkEntity update(Long id, WorkEntity updated) {
         WorkEntity existing = workRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+            .orElseThrow(() -> new ResourceNotFoundException("Serviço não encontrado"));
 
         existing.setStartDateTime(updated.getStartDateTime());
         existing.setEndDateTime(updated.getEndDateTime());
