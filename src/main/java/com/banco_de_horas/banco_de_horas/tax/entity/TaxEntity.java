@@ -35,7 +35,7 @@ public class TaxEntity {
     @Column(name = "saldo_de_horas", nullable = false, precision = 10, scale = 2)
     @NotNull(message = "Saldo de horas é obrigatório")
     @DecimalMin(value = "0.00", message = "Saldo não pode ser negativo")
-    private BigDecimal balanceOfHours;
+    private BigDecimal balanceOfHours = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_usuario", nullable = false, length = 20)
