@@ -26,28 +26,29 @@
 
     <!-- Navigation Tabs -->
     <nav class="flex space-x-0 border-b border-gray-200 mb-6">
-        <button class="tab-button bg-white text-blue-600 border-b-2 border-blue-600 font-semibold px-6 py-3 hover:text-blue-600 focus:outline-none transition-colors duration-200 -mb-px">
+        <a href="/banco_de_horas/dashboard/administrador?tab=fiscais"
+           th:class="${activeTab == 'fiscais'} ? 'bg-white text-blue-600 border-b-2 border-blue-600 font-semibold px-6 py-3 focus:outline-none transition-colors duration-200 -mb-px' : 'px-6 py-3 text-gray-500 hover:text-blue-600 focus:outline-none transition-colors duration-200 -mb-px'">
             Fiscais
-        </button>
-        <a href="/feriados"
-           class="tab-button px-6 py-3 text-gray-500 hover:text-blue-600 focus:outline-none transition-colors duration-200 -mb-px">
+        </a>
+        <a href="/banco_de_horas/dashboard/administrador?tab=feriados"
+           th:class="${activeTab == 'feriados'} ? 'bg-white text-blue-600 border-b-2 border-blue-600 font-semibold px-6 py-3 focus:outline-none transition-colors duration-200 -mb-px' : 'px-6 py-3 text-gray-500 hover:text-blue-600 focus:outline-none transition-colors duration-200 -mb-px'">
             Feriados
         </a>
         <div class="flex-grow border-b border-gray-200 -mb-px"></div>
     </nav>
 
     <!-- Main Content Area: Lista de Fiscais -->
-    <main class="bg-white p-6 rounded-lg shadow-md">
+    <main th:if="${activeTab == 'fiscais'}" class="bg-white p-6 rounded-lg shadow-md">
         <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
             <h2 class="text-xl font-semibold text-gray-800">Lista de Fiscais</h2>
             <button onclick="toggleModal(true)"
                     class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                <img th:src="@{/images/user-plus.svg}" alt="Ícone" class="mr-2 h-4 w-4" />
+                <img th:src="@{/images/user-plus.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
                 Adicionar Fiscal
             </button>
         </div>
 
-        <div th:unless="${fiscais.isEmpty()}" class="">
+        <div th:unless="${fiscais.isEmpty()}">
 
             <div th:each="fiscal : ${fiscais}"
                  class="flex items-center justify-between p-2 border-b border-gray-150 last:border-b-0 hover:bg-gray-100 rounded-md transition-colors duration-150">
@@ -63,8 +64,8 @@
                         Saldo de Horas:
                         <span class="font-medium"
                               th:text="${#numbers.formatDecimal(fiscal.balanceOfHours, 1, 'POINT', 2, 'COMMA')}">
-                    0,00
-                </span>
+                0,00
+            </span>
                         horas
                     </p>
                 </div>
@@ -97,6 +98,69 @@
         </div>
     </main>
 
+    <main th:if="${activeTab == 'feriados'}" class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Lista de Feriados</h2>
+            <button onclick="toggleHolidayModal(true)"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                <img th:src="@{/images/plus.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
+                Adicionar Feriado
+            </button>
+        </div>
+
+        <!-- Lista Vazia de Feriados -->
+        <div th:if="${feriados.isEmpty()}" class="text-gray-500 italic text-center py-8">
+            Nenhum feriado cadastrado
+        </div>
+
+        <div th:unless="${feriados.isEmpty()}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div th:each="feriado : ${feriados}"
+                 class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+
+                <!-- Header do Card -->
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-purple-500"></div>
+                        <span class="text-xs font-medium text-purple-600">Feriado</span>
+                    </div>
+
+                    <!-- Menu de Ações -->
+                    <div class="flex space-x-1">
+                        <button class="p-1 text-gray-400 hover:text-yellow-600 transition-colors duration-200" title="Editar" th:data-id="${feriado.id}" th:data-date="${#temporals.format(feriado.date, 'yyyy-MM-dd')}" th:data-description="${feriado.description}">
+                            <img th:src="@{/images/edit.svg}" alt="Editar" class="h-4 w-4"/>
+                        </button>
+                        <form th:action="@{/banco_de_horas/dashboard/excluir/feriado/{id}(id=${feriado.id})}"
+                              method="POST"
+                              style="display: inline;"
+                              onsubmit="return confirm('Tem certeza que deseja excluir este feriado? Esta ação é irreversível.')">
+                            <input type="hidden" name="_method" value="DELETE"/>
+                            <button type="submit"
+                                    class="p-1 text-gray-400 hover:text-red-600 transition-colors duration-200"
+                                    title="Excluir">
+                                <img th:src="@{/images/trash-2.svg}" alt="Excluir" class="h-4 w-4"/>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Conteúdo Principal do Card -->
+                <div>
+                    <h3 class="font-semibold text-gray-800 text-sm mb-1 line-clamp-2" th:text="${feriado.description}">
+                        Descrição do Feriado
+                    </h3>
+
+                    <div class="flex items-center text-sm text-gray-600">
+                        <img th:src="@{/images/calendar.svg}" alt="Calendário" class="mr-1 h-4 w-4"/>
+                        <span th:text="${#temporals.format(feriado.date, 'dd/MM/yyyy -')}" class="mr-1">01/01/2024</span>
+                        <span class="text-xs text-gray-500" th:text="${#temporals.format(feriado.date, 'EEEE', #locale)}" th:with="locale=${#locale}">
+                        Segunda-feira
+                    </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
 </div>
 
 <!-- Modal para Adicionar Fiscal -->
@@ -104,9 +168,10 @@
     <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
         <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
             <h3 class="text-xl font-semibold text-gray-800">Adicionar Novo Fiscal</h3>
-            <button onclick="toggleModal(false)" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+            <button onclick="toggleModal(false)"
+                    class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
@@ -152,6 +217,68 @@
     </div>
 </div>
 
+<!-- Modal para Adicionar Feriado -->
+<div id="addHolidayModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-full p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold mb-4">Adicionar Feriado</h3>
+
+            <form action="/banco_de_horas/dashboard/criar/feriado" method="POST">
+                <div class="mb-4">
+                    <label class="block mb-2">Data:</label>
+                    <input type="date" name="date" class="w-full border p-2 rounded" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2">Descrição:</label>
+                    <input type="text" name="description" placeholder="Ex: Natal, Ano Novo..." class="w-full border p-2 rounded" required>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="toggleHolidayModal(false)" class="bg-gray-500 text-white px-4 py-2 rounded">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar Feriado -->
+<div id="editHolidayModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-full p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold mb-4">Editar Feriado</h3>
+
+            <form id="editHolidayForm" th:action="@{/banco_de_horas/dashboard/editar/feriado}" method="POST">
+                <input type="hidden" id="editHolidayId" name="id"/>
+
+                <div class="mb-4">
+                    <label class="block mb-2">Data:</label>
+                    <input type="date" id="editHolidayDate" name="date" class="w-full border p-2 rounded" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2">Descrição:</label>
+                    <input type="text" id="editHolidayDescription" name="description" class="w-full border p-2 rounded" required>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="toggleEditHolidayModal(false)" class="bg-gray-500 text-white px-4 py-2 rounded">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function toggleModal(show) {
         const modal = document.getElementById('addFiscalModal');
@@ -159,33 +286,88 @@
 
         if (show) {
             modal.classList.remove('hidden');
-            body.classList.add('overflow-hidden'); // Tailwind para impedir scroll
-            // Foca no primeiro campo quando abre
+            body.classList.add('overflow-hidden');
             document.getElementById('fullName').focus();
         } else {
             modal.classList.add('hidden');
-            body.classList.remove('overflow-hidden'); // Tailwind para restaurar scroll
-            // Limpa o formulário quando fecha
+            body.classList.remove('overflow-hidden');
             document.getElementById('addFiscalForm').reset();
         }
     }
 
+    // ADICIONAR: Função para modal de feriados
+    function toggleHolidayModal(show) {
+        const modal = document.getElementById('addHolidayModal');
+        const body = document.body;
+
+        if (show) {
+            modal.classList.remove('hidden');
+            body.classList.add('overflow-hidden');
+            document.getElementById('holidayDate').focus();
+        } else {
+            modal.classList.add('hidden');
+            body.classList.remove('overflow-hidden');
+            document.getElementById('addHolidayForm').reset();
+        }
+    }
+
+    function toggleEditHolidayModal(show) {
+        const modal = document.getElementById('editHolidayModal');
+        const body = document.body;
+
+        if (show) {
+            modal.classList.remove('hidden');
+            body.classList.add('overflow-hidden');
+            document.getElementById('editHolidayDate').focus();
+        } else {
+            modal.classList.add('hidden');
+            body.classList.remove('overflow-hidden');
+            document.getElementById('editHolidayForm').reset();
+        }
+    }
+
+    // ADICIONAR: Event listener para capturar cliques nos botões de editar
+    document.addEventListener('click', function(event) {
+        // Verifica se o clique foi em um botão de editar feriado
+        const editButton = event.target.closest('button[data-id]');
+        if (editButton && editButton.hasAttribute('data-date')) {
+            const holidayId = editButton.getAttribute('data-id');
+            const holidayDate = editButton.getAttribute('data-date');
+            const holidayDescription = editButton.getAttribute('data-description');
+
+            // Preenche os campos do modal de edição
+            document.getElementById('editHolidayId').value = holidayId;
+            document.getElementById('editHolidayDate').value = holidayDate;
+            document.getElementById('editHolidayDescription').value = holidayDescription;
+
+            // Abre o modal de edição
+            toggleEditHolidayModal(true);
+        }
+    });
+
     // Fechar modal ao clicar fora dele
-    document.getElementById('addFiscalModal').addEventListener('click', function(event) {
+    document.getElementById('addFiscalModal').addEventListener('click', function (event) {
         if (event.target === this) {
             toggleModal(false);
         }
     });
 
-    // Fechar modal com tecla ESC
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && !document.getElementById('addFiscalModal').classList.contains('hidden')) {
+    // Fechar modal ao clicar fora dele
+    document.getElementById('addFiscalModal').addEventListener('click', function (event) {
+        if (event.target === this) {
             toggleModal(false);
         }
     });
 
-    // Validação do formulário
-    document.getElementById('addFiscalForm').addEventListener('submit', function(event) {
+    // ADICIONAR: Fechar modal de feriados ao clicar fora
+    document.getElementById('addHolidayModal').addEventListener('click', function (event) {
+        if (event.target === this) {
+            toggleHolidayModal(false);
+        }
+    });
+
+    // Validação do formulário de fiscal
+    document.getElementById('addFiscalForm').addEventListener('submit', function (event) {
         const fullName = document.getElementById('fullName').value.trim();
         const registration = document.getElementById('registration').value.trim();
         const userType = document.getElementById('userType').value;
@@ -210,8 +392,26 @@
         }
     });
 
+    // ADICIONAR: Validação do formulário de feriados
+    document.getElementById('addHolidayForm').addEventListener('submit', function (event) {
+        const date = document.getElementById('holidayDate').value;
+        const description = document.getElementById('holidayDescription').value.trim();
+
+        if (!date || !description) {
+            event.preventDefault();
+            alert('Por favor, preencha todos os campos obrigatórios.');
+            return;
+        }
+
+        if (description.length < 3) {
+            event.preventDefault();
+            alert('Descrição deve ter pelo menos 3 caracteres.');
+            return;
+        }
+    });
+
     // Gerenciar estado ativo das abas usando apenas Tailwind
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const activeTab = document.querySelector('.tab-button');
         if (activeTab) {
             activeTab.classList.add('bg-white', 'text-blue-600', 'border-b-2', 'border-blue-600', 'font-semibold');
