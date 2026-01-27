@@ -6,6 +6,10 @@ import com.banco_de_horas.banco_de_horas.holiday.service.HolidayService;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.service.TaxService;
+import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthLyTimeOffSummaryDTO;
+import com.banco_de_horas.banco_de_horas.timeOffUsage.service.TimeOffUsageService;
+import com.banco_de_horas.banco_de_horas.work.dto.MonthLyWorkSummaryDTO;
+import com.banco_de_horas.banco_de_horas.work.service.WorkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +28,12 @@ public class DashboardController {
     @Autowired
     private HolidayService holidayService;
 
+    @Autowired
+    private WorkService workService;
+
+    @Autowired
+    private TimeOffUsageService timeOffUsageService;
+
     @GetMapping("/administrador")
     public String showDashboard(Model model,  @RequestParam(defaultValue = "fiscais") String tab) {
         List<TaxEntity> fiscais = taxService.getAllTax();
@@ -34,6 +44,31 @@ public class DashboardController {
         model.addAttribute("activeTab", tab);
         model.addAttribute("userName", "Eduardo");
         return "dashboardManager";
+    }
+
+    @GetMapping("/fiscal/{id}")
+    public String showFiscalDetails(@PathVariable Long id, Model model) {
+        try {
+            TaxEntity tax = taxService.findById(id);
+            MonthLyWorkSummaryDTO WorkSummary = workService.getMonthLySummary(tax);
+            MonthLyTimeOffSummaryDTO  timeOffSummary = timeOffUsageService.getMonthLySummary(tax);
+
+            model.addAttribute("timeOffSummary", timeOffSummary);
+            model.addAttribute("WorkSummary", WorkSummary);
+            model.addAttribute("fiscal", tax);
+            model.addAttribute("userName", "Eduardo");
+
+            // Adicionar dados específicos do dashboard do fiscal (se houver)
+            // List<ServiceEntity> services = serviceService.findByFiscalId(id);
+            // List<LeaveEntity> leaves = leaveService.findByFiscalId(id);
+            // model.addAttribute("services", services);
+            // model.addAttribute("leaves", leaves);
+
+            return "dashboardTax";
+
+        } catch (Exception e) {
+            return "redirect:/banco_de_horas/dashboard/administrador?error=FiscalNotFound";
+        }
     }
 
     @PostMapping("/criar/fiscal")
