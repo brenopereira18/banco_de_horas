@@ -4,6 +4,7 @@ import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
 import com.banco_de_horas.banco_de_horas.holiday.repository.HolidayRepository;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
+import com.banco_de_horas.banco_de_horas.work.dto.MonthLyWorkSummaryDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkResponseDTO;
 import com.banco_de_horas.banco_de_horas.work.entity.WorkEntity;
@@ -17,6 +18,7 @@ import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -156,6 +158,25 @@ public class WorkService {
             end.format(DateTimeFormatter.ofPattern("HH:mm")),
             multiplier,
             generated
+        );
+    }
+
+    public MonthLyWorkSummaryDTO getMonthLySummary(TaxEntity tax) {
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime start = currentMonth
+            .atDay(1)
+            .atStartOfDay();
+
+        LocalDateTime end = currentMonth
+            .atEndOfMonth()
+            .atTime(23, 59, 59);
+
+        Long totalServices = workRepository.countByTaxAndPeriod(tax, start, end);
+        BigDecimal totalHours = workRepository.sumHoursGeneratedByTaxAndPeriod(tax, start, end);
+
+        return new MonthLyWorkSummaryDTO(
+            totalServices,
+            totalHours
         );
     }
 }
