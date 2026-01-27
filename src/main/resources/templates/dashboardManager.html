@@ -64,29 +64,16 @@
                         Saldo de Horas:
                         <span class="font-medium"
                               th:text="${#numbers.formatDecimal(fiscal.balanceOfHours, 1, 'POINT', 2, 'COMMA')}">
-                0,00
-            </span>
+                            0,00
+                        </span>
                         horas
                     </p>
                 </div>
 
-                <!-- Ações -->
-                <div class="flex items-center space-x-2">
-                    <button
-                            class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200">
-                        Ver Detalhes
-                    </button>
-
-                    <button
-                            class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors duration-200">
-                        Adicionar Serviço
-                    </button>
-
-                    <button
-                            class="px-3 py-1 text-xs bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors duration-200">
-                        Usar Folga
-                    </button>
-                </div>
+                <a th:href="@{/banco_de_horas/dashboard/fiscal/{id}(id=${fiscal.id})}"
+                   class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200">
+                    Ver Detalhes
+                </a>
 
             </div>
         </div>
@@ -113,7 +100,8 @@
             Nenhum feriado cadastrado
         </div>
 
-        <div th:unless="${feriados.isEmpty()}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div th:unless="${feriados.isEmpty()}"
+             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div th:each="feriado : ${feriados}"
                  class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
 
@@ -126,7 +114,10 @@
 
                     <!-- Menu de Ações -->
                     <div class="flex space-x-1">
-                        <button class="p-1 text-gray-400 hover:text-yellow-600 transition-colors duration-200" title="Editar" th:data-id="${feriado.id}" th:data-date="${#temporals.format(feriado.date, 'yyyy-MM-dd')}" th:data-description="${feriado.description}">
+                        <button class="p-1 text-gray-400 hover:text-yellow-600 transition-colors duration-200"
+                                title="Editar" th:data-id="${feriado.id}"
+                                th:data-date="${#temporals.format(feriado.date, 'yyyy-MM-dd')}"
+                                th:data-description="${feriado.description}">
                             <img th:src="@{/images/edit.svg}" alt="Editar" class="h-4 w-4"/>
                         </button>
                         <form th:action="@{/banco_de_horas/dashboard/excluir/feriado/{id}(id=${feriado.id})}"
@@ -151,8 +142,10 @@
 
                     <div class="flex items-center text-sm text-gray-600">
                         <img th:src="@{/images/calendar.svg}" alt="Calendário" class="mr-1 h-4 w-4"/>
-                        <span th:text="${#temporals.format(feriado.date, 'dd/MM/yyyy -')}" class="mr-1">01/01/2024</span>
-                        <span class="text-xs text-gray-500" th:text="${#temporals.format(feriado.date, 'EEEE', #locale)}" th:with="locale=${#locale}">
+                        <span th:text="${#temporals.format(feriado.date, 'dd/MM/yyyy -')}"
+                              class="mr-1">01/01/2024</span>
+                        <span class="text-xs text-gray-500"
+                              th:text="${#temporals.format(feriado.date, 'EEEE', #locale)}" th:with="locale=${#locale}">
                         Segunda-feira
                     </span>
                     </div>
@@ -231,11 +224,13 @@
 
                 <div class="mb-4">
                     <label class="block mb-2">Descrição:</label>
-                    <input type="text" name="description" placeholder="Ex: Natal, Ano Novo..." class="w-full border p-2 rounded" required>
+                    <input type="text" name="description" placeholder="Ex: Natal, Ano Novo..."
+                           class="w-full border p-2 rounded" required>
                 </div>
 
                 <div class="flex gap-2">
-                    <button type="button" onclick="toggleHolidayModal(false)" class="bg-gray-500 text-white px-4 py-2 rounded">
+                    <button type="button" onclick="toggleHolidayModal(false)"
+                            class="bg-gray-500 text-white px-4 py-2 rounded">
                         Cancelar
                     </button>
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">
@@ -263,11 +258,13 @@
 
                 <div class="mb-4">
                     <label class="block mb-2">Descrição:</label>
-                    <input type="text" id="editHolidayDescription" name="description" class="w-full border p-2 rounded" required>
+                    <input type="text" id="editHolidayDescription" name="description" class="w-full border p-2 rounded"
+                           required>
                 </div>
 
                 <div class="flex gap-2">
-                    <button type="button" onclick="toggleEditHolidayModal(false)" class="bg-gray-500 text-white px-4 py-2 rounded">
+                    <button type="button" onclick="toggleEditHolidayModal(false)"
+                            class="bg-gray-500 text-white px-4 py-2 rounded">
                         Cancelar
                     </button>
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">
@@ -327,7 +324,7 @@
     }
 
     // ADICIONAR: Event listener para capturar cliques nos botões de editar
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         // Verifica se o clique foi em um botão de editar feriado
         const editButton = event.target.closest('button[data-id]');
         if (editButton && editButton.hasAttribute('data-date')) {
