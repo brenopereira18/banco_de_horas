@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - <span th:text="${fiscal.fullName}">Fiscal</span></title>
+    <link rel="stylesheet" th:href="@{/css/output.css}">
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800 font-sans h-full">
+<div class="container mx-auto p-6 max-w-7xl">
+
+    <!-- Header Section -->
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Dashboard - Fiscal</h1>
+            <p class="text-lg text-gray-600 mt-1">
+                Bem-vindo, <span th:text="${fiscal.fullName}">Breno Pereira Betti</span>
+            </p>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <!-- Botão Voltar -->
+            <a href="/banco_de_horas/dashboard/administrador"
+               class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold transition-colors duration-200">
+                <span>←</span>
+                <span>Voltar</span>
+            </a>
+
+            <!-- Botão Sair -->
+            <a href="/logout"
+               class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold transition-colors duration-200">
+                <span>→</span>
+                <span>Sair</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Cards Principais (3 colunas) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+
+        <!-- Card 1: Saldo de Horas -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm font-medium text-gray-600">Saldo de Horas</h2>
+                <img th:src="@{/images/clock.svg}" alt="Relógio" class="h-4 w-4"/>
+            </div>
+            <div class="text-2xl font-bold text-gray-900 mb-1"
+                 th:text="${#numbers.formatDecimal(fiscal.balanceOfHours, 1, 'POINT', 2, 'COMMA')} + ' horas'">
+                56,75 horas
+            </div>
+            <div class="text-sm text-gray-500">
+                <span th:text="${#numbers.formatDecimal(fiscal.balanceOfHours / 8, 1, 'POINT', 1, 'COMMA')}">7,1</span> dias
+            </div>
+        </div>
+
+        <!-- Card 2: Serviços Realizados -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm font-medium text-gray-600">Serviços Realizados</h2>
+                <img th:src="@{/images/check-circle.svg}" alt="Check" class="h-4 w-4"/>
+            </div>
+            <div class="text-2xl font-bold text-gray-900 mb-1" th:text="${WorkSummary.totalServices}">0</div>
+            <div class="text-sm text-gray-500" th:text="${WorkSummary.totalHoursGenerated + ' horas geradas no mês'}">0.00 horas geradas no mês</div>
+        </div>
+
+        <!-- Card 3: Folgas Utilizadas -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm font-medium text-gray-600">Folgas Utilizadas</h2>
+                <img th:src="@{/images/calendar.svg}" alt="Calendário" class="h-4 w-4"/>
+            </div>
+            <div class="text-2xl font-bold text-gray-900 mb-1" th:text="${timeOffSummary.totalTimeOffs()}">0</div>
+            <div class="text-sm text-gray-500" th:text="${timeOffSummary.totalHoursUsed() + ' horas usadas no mês'}">0.00 horas usadas no mês</div>
+        </div>
+    </div>
+
+    <!-- Seção Principal: Duas Colunas -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Coluna Esquerda: Serviços Realizados -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-gray-800">Serviços Realizados</h2>
+                <button class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors duration-200">
+                    + Adicionar Serviço
+                </button>
+            </div>
+
+            <!-- Lista de Serviços -->
+            <div class="space-y-4">
+                <!-- Item de Serviço -->
+                <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-gray-900 mb-1">Fiscalização de Obra - Edifício Central</h3>
+                            <p class="text-sm text-gray-500 mb-2">25/01/2026 • 14:00 - 22:00</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm font-medium text-green-600">+8,0 horas</span>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Concluído</span>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-gray-900 mb-1">Vistoria Técnica - Residencial</h3>
+                            <p class="text-sm text-gray-500 mb-2">24/01/2026 • 08:00 - 14:30</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm font-medium text-green-600">+6,5 horas</span>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Concluído</span>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-gray-900 mb-1">Análise de Projeto</h3>
+                            <p class="text-sm text-gray-500 mb-2">23/01/2026 • 13:00 - 17:00</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm font-medium text-green-600">+4,0 horas</span>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Concluído</span>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ver Mais -->
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    Ver todos os serviços →
+                </button>
+            </div>
+        </div>
+
+        <!-- Coluna Direita: Histórico de Folgas -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-gray-800">Histórico de Folgas</h2>
+                <button class="px-4 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 transition-colors duration-200">
+                    + Usar Folga
+                </button>
+            </div>
+
+            <!-- Lista de Folgas -->
+            <div class="space-y-4">
+                <!-- Item de Folga -->
+                <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-gray-900 mb-1">Folga Compensatória</h3>
+                            <p class="text-sm text-gray-500 mb-2">20/01/2026 • Dia completo</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm font-medium text-orange-600">-8,0 horas</span>
+                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Utilizada</span>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-gray-900 mb-1">Meio Período</h3>
+                            <p class="text-sm text-gray-500 mb-2">18/01/2026 • 13:00 - 17:00</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm font-medium text-orange-600">-4,0 horas</span>
+                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Utilizada</span>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-gray-900 mb-1">Folga Compensatória</h3>
+                            <p class="text-sm text-gray-500 mb-2">15/01/2026 • Dia completo</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm font-medium text-orange-600">-8,0 horas</span>
+                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Utilizada</span>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ver Mais -->
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <button class="text-orange-600 hover:text-orange-800 text-sm font-medium">
+                    Ver histórico completo →
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -62,4 +62,11 @@ public class TaxService {
 
         taxRepository.delete(existing);
     }
+
+    public TaxEntity findById(Long id) {
+        TaxEntity existingTax = taxRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
+
+        return existingTax;
+    }
 }
