@@ -63,7 +63,7 @@
                     <p class="text-sm text-gray-500">
                         Saldo de Horas:
                         <span class="font-medium"
-                              th:text="${#numbers.formatDecimal(fiscal.balanceOfHours, 1, 'POINT', 2, 'COMMA')}">
+                              th:text="${#numbers.formatDecimal(fiscal.getBalanceOfHours(), 1, 'POINT', 2, 'COMMA')}">
                             0,00
                         </span>
                         horas
