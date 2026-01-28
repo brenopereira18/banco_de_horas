@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface WorkRepository extends JpaRepository<WorkEntity, Long> {
     @Query("""
@@ -32,5 +33,11 @@ public interface WorkRepository extends JpaRepository<WorkEntity, Long> {
         @Param("tax") TaxEntity tax,
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end
+    );
+
+    List<WorkEntity> findByTaxEntityAndStartDateTimeBetween(
+        TaxEntity tax,
+        LocalDateTime start,
+        LocalDateTime end
     );
 }

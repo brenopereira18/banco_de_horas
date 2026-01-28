@@ -73,13 +73,14 @@ public class TaxEntity {
      * Fiscal: 6h = 1 dia
      * Supervisor/Admin: 8h = 1 dia
      */
-    public BigDecimal getBalanceInDays() {
-        BigDecimal divisor = switch (userType) {
+    public long getBalanceInDays() {
+        BigDecimal hoursPerDay = switch (userType) {
             case FISCAL -> BigDecimal.valueOf(6);
             case SUPERVISOR, ADMINISTRADOR -> BigDecimal.valueOf(8);
         };
 
         return balanceOfHours
-            .divide(divisor, 2, RoundingMode.HALF_UP);
+            .divide(hoursPerDay, 0, RoundingMode.FLOOR)
+            .longValue();
     }
 }
