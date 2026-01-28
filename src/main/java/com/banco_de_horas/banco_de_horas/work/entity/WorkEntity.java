@@ -38,6 +38,9 @@ public class WorkEntity {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime startDateTime;
 
+    @Column(name = "descricao")
+    private String description;
+
     @Column(name = "data_hora_fim", nullable = false)
     @NotNull(message = "Data/hora de fim é obrigatória")
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")

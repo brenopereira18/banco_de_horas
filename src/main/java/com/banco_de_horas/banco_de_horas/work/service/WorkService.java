@@ -4,7 +4,9 @@ import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
 import com.banco_de_horas.banco_de_horas.holiday.repository.HolidayRepository;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
+import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
 import com.banco_de_horas.banco_de_horas.work.dto.MonthLyWorkSummaryDTO;
+import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkItemDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkResponseDTO;
 import com.banco_de_horas.banco_de_horas.work.entity.WorkEntity;
@@ -15,11 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.DayOfWeek;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @Transactional
@@ -43,6 +43,7 @@ public class WorkService {
             .taxEntity(fiscal)
             .startDateTime(dto.startDateTime())
             .endDateTime(dto.endDateTime())
+            .description(dto.description())
             .build();
 
         calculateAndApply(work);
@@ -57,6 +58,7 @@ public class WorkService {
             work.getId(),
             work.getTaxEntity().getId(),
             work.getTaxEntity().getFullName(),
+            work.getDescription(),
             work.getStartDateTime(),
             work.getEndDateTime(),
             work.getHoursWorked(),
@@ -66,21 +68,23 @@ public class WorkService {
         );
     }
 
-    public WorkEntity update(Long id, WorkEntity updated) {
+    public WorkEntity update(Long id, WorkRequestDTO updated) {
         WorkEntity existing = workRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Serviço não encontrado"));
 
-        existing.setStartDateTime(updated.getStartDateTime());
-        existing.setEndDateTime(updated.getEndDateTime());
-        existing.setTaxEntity(updated.getTaxEntity());
+        existing.setDescription(updated.description());
+        existing.setStartDateTime(updated.startDateTime());
+        existing.setEndDateTime(updated.endDateTime());
 
         calculateAndApply(existing);
         return workRepository.save(existing);
     }
 
+    /**
+     * Calcula as horas geradas por serviço
+     */
     private void calculateAndApply(WorkEntity work) {
-
-        BigDecimal totalGeneratedTimeOff = BigDecimal.ZERO;
+        BigDecimal totalGeneratedMinutes = BigDecimal.ZERO;
         StringBuilder details = new StringBuilder();
 
         LocalDateTime current = work.getStartDateTime();
@@ -93,31 +97,48 @@ public class WorkService {
                 nextHour = end;
             }
 
-            BigDecimal workedHours = BigDecimal.valueOf(
+            // Trabalha SEMPRE em minutos inteiros
+            BigDecimal workedMinutes = BigDecimal.valueOf(
                 Duration.between(current, nextHour).toMinutes()
-            ).divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
+            );
 
             BigDecimal multiplier = getMultiplier(current);
 
-            BigDecimal generated = workedHours.multiply(multiplier)
-                .setScale(2, RoundingMode.HALF_UP);
+            // Aplica multiplicador em minutos
+            BigDecimal generatedMinutes = workedMinutes.multiply(multiplier);
 
-            totalGeneratedTimeOff = totalGeneratedTimeOff.add(generated);
+            totalGeneratedMinutes = totalGeneratedMinutes.add(generatedMinutes);
 
-            details.append(formatDetail(current, nextHour, multiplier, generated));
+            // Apenas para exibição
+            BigDecimal generatedHoursForDetail = generatedMinutes
+                .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
+
+            details.append(formatDetail(
+                current,
+                nextHour,
+                multiplier,
+                generatedHoursForDetail
+            ));
 
             current = nextHour;
         }
 
-        work.setGeneratedTimeOff(totalGeneratedTimeOff);
+        // Converte para horas
+        BigDecimal totalGeneratedHours = totalGeneratedMinutes
+            .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
+
+        work.setGeneratedTimeOff(totalGeneratedHours);
         work.setDetailedCalculation(details.toString());
 
         // Atualiza saldo do fiscal
-        TaxEntity fiscal = work.getTaxEntity();
-        fiscal.addHours(totalGeneratedTimeOff);
-        taxRepository.save(fiscal);
+        TaxEntity tax = work.getTaxEntity();
+        tax.addHours(totalGeneratedHours);
+        taxRepository.save(tax);
     }
 
+    /**
+     * Pega o bônus conforme o dia do serviço
+     */
     private BigDecimal getMultiplier(LocalDateTime dateTime) {
 
         boolean isHoliday = holidayRepository.existsByDate(dateTime.toLocalDate());
@@ -161,6 +182,9 @@ public class WorkService {
         );
     }
 
+    /**
+     * busca quantos serviços o fiscal fez no mês e quantas horas foram geradas
+     */
     public MonthLyWorkSummaryDTO getMonthLySummary(TaxEntity tax) {
         YearMonth currentMonth = YearMonth.now();
         LocalDateTime start = currentMonth
@@ -178,5 +202,65 @@ public class WorkService {
             totalServices,
             totalHours
         );
+    }
+
+    /**
+     * busca serviços do mês de um usuário
+     */
+
+    public List<MonthlyWorkItemDTO> getMonthlyWorks(TaxEntity tax) {
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime start = currentMonth
+            .atDay(1)
+            .atStartOfDay();
+        LocalDateTime end = currentMonth
+            .atEndOfMonth()
+            .atTime(23, 59, 59);
+
+        return workRepository
+            .findByTaxEntityAndStartDateTimeBetween(tax, start, end)
+            .stream()
+            .map(work -> {
+
+                boolean isHoliday = hasHoliday(
+                    work.getStartDateTime(),
+                    work.getEndDateTime()
+                );
+
+                return new MonthlyWorkItemDTO(
+                    work.getId(),
+                    work.getDescription(),
+                    work.getStartDateTime(),
+                    work.getEndDateTime(),
+                    isHoliday,
+                    work.getGeneratedTimeOff(),
+                    TimeFormatUtils.formatHours(work.getGeneratedTimeOff())
+                );
+            })
+            .toList();
+    }
+
+    private boolean hasHoliday(LocalDateTime start, LocalDateTime end) {
+        LocalDate currentDate = start.toLocalDate();
+        LocalDate endDate = end.toLocalDate();
+
+        while (!currentDate.isAfter(endDate)) {
+            if (holidayRepository.existsByDate(currentDate)) {
+                return true;
+            }
+            currentDate = currentDate.plusDays(1);
+        }
+
+        return false;
+    }
+
+    public void delete(Long id) {
+        WorkEntity existing = workRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Serviço não encontrado"));
+
+        TaxEntity tax = existing.getTaxEntity();
+        tax.subtractHours(existing.getGeneratedTimeOff());
+        taxRepository.save(tax);
+        workRepository.delete(existing);
     }
 }
