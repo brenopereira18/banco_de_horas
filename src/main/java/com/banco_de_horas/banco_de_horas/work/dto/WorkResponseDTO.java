@@ -8,7 +8,7 @@ public record WorkResponseDTO(
 
     Long taxId,
     String fiscalName,
-
+    String description,
     LocalDateTime startDateTime,
     LocalDateTime endDateTime,
 
