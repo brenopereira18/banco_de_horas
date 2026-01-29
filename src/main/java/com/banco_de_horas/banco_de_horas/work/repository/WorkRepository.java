@@ -35,7 +35,7 @@ public interface WorkRepository extends JpaRepository<WorkEntity, Long> {
         @Param("end") LocalDateTime end
     );
 
-    List<WorkEntity> findByTaxEntityAndStartDateTimeBetween(
+    List<WorkEntity> findByTaxEntityAndStartDateTimeBetweenOrderByRegistrationDateDesc(
         TaxEntity tax,
         LocalDateTime start,
         LocalDateTime end

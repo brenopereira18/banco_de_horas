@@ -132,12 +132,15 @@
 
                         <!-- Menu de Ações -->
                         <div class="flex space-x-1">
-                            <!--<button class="p-1 text-gray-400 hover:text-yellow-600 transition-colors duration-200"
-                                    title="Editar" th:data-id="${work.id}"
-                                    th:data-date="${#temporals.format(work.startDateTime, 'yyyy-MM-dd')}"
-                                    th:data-date="${#temporals.format(work.endDateTime, 'yyyy-MM-dd')}">
-                                <img th:src="@{/images/edit.svg}" alt="Editar" class="h-4 w-4"/>
-                            </button> -->
+                            <button class="p-1 text-gray-400 hover:text-yellow-600"
+                                    title="Editar"
+                                    th:data-id="${work.id}"
+                                    th:data-description="${work.description}"
+                                    th:data-start="${#temporals.format(work.startDateTime, 'yyyy-MM-dd HH:mm')}"
+                                    th:data-end="${#temporals.format(work.endDateTime, 'yyyy-MM-dd HH:mm')}"
+                                    onclick="openEditModal(this)">
+                                <img th:src="@{/images/edit.svg}" class="h-4 w-4"/>
+                            </button>
                             <form th:action="@{/banco_de_horas/dashboard/excluir/servico/{id}(id=${work.id})}"
                                   method="POST"
                                   style="display: inline;"
@@ -292,6 +295,65 @@
         </div>
     </div>
 
+    <div id="editServiceModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
+        <div class="flex items-center justify-center min-h-full p-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4">Editar Serviço</h3>
+
+                <form id="editServiceForm"
+                      th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/editar/servico(taxId=${fiscal.id})}"
+                      method="POST">
+
+                    <input type="hidden" id="editWorkId" name="workId"/>
+
+                    <div class="mb-4">
+                        <label for="editDescription" class="block text-gray-700 text-sm font-bold mb-2">
+                            Descrição do Serviço:
+                        </label>
+                        <input type="text"
+                               id="editDescription"
+                               name="description"
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="editStartDateTime" class="block text-gray-700 text-sm font-bold mb-2">
+                            Início do Serviço:
+                        </label>
+                        <input type="datetime-local"
+                               id="editStartDateTime"
+                               name="startDateTime"
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                               required>
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="editEndDateTime" class="block text-gray-700 text-sm font-bold mb-2">
+                            Fim do Serviço:
+                        </label>
+                        <input type="datetime-local"
+                               id="editEndDateTime"
+                               name="endDateTime"
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                               required>
+                    </div>
+
+                    <div class="flex justify-end space-x-2">
+                        <button type="button"
+                                onclick="toggleEditModal(false)"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-yellow-600 text-white text-sm rounded-md hover:bg-yellow-700 transition-colors duration-200">
+                            Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -368,6 +430,38 @@
                 event.preventDefault();
                 return;
             }
+        }
+    });
+
+    function openEditModal(button) {
+        document.getElementById('editWorkId').value =
+            button.dataset.id;
+
+        document.getElementById('editDescription').value =
+            button.dataset.description || '';
+
+        document.getElementById('editStartDateTime').value =
+            button.dataset.start;
+
+        document.getElementById('editEndDateTime').value =
+            button.dataset.end;
+
+        toggleEditModal(true);
+    }
+
+    function toggleEditModal(show) {
+        const modal = document.getElementById('editServiceModal');
+        if (show) {
+            modal.classList.remove('hidden');
+        } else {
+            modal.classList.add('hidden');
+        }
+    }
+
+    // Fechar modal ao clicar fora dela
+    document.getElementById('editServiceModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            toggleEditModal(false);
         }
     });
 </script>

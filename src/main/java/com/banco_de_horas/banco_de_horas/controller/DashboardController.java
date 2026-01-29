@@ -75,17 +75,23 @@ public class DashboardController {
         }
     }
 
-    @PostMapping("/editar/servico")
-    public String editWork(@ModelAttribute WorkRequestDTO workRequestDTO, @RequestParam Long id, RedirectAttributes redirectAttributes) {
-        try {
-            workService.update(id, workRequestDTO);
-            redirectAttributes.addFlashAttribute("successMessage",
-                "Feriado atualizado com sucesso!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                "Erro ao atualizar feriado: " + e.getMessage());
-        }
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + id;
+    @PostMapping("/fiscal/{taxId}/editar/servico")
+    public String editWork(
+        @RequestParam Long workId,
+        @PathVariable Long taxId,
+        @RequestParam(required = false) String description,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDateTime
+    ) {
+        WorkRequestDTO dto = new WorkRequestDTO(
+            taxId,
+            description,
+            startDateTime,
+            endDateTime
+        );
+        workService.update(workId, dto);
+
+        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
     @PostMapping("/excluir/servico/{id}")

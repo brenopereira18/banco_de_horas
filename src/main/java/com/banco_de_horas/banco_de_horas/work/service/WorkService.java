@@ -72,6 +72,9 @@ public class WorkService {
         WorkEntity existing = workRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Serviço não encontrado"));
 
+        TaxEntity tax = existing.getTaxEntity();
+        tax.subtractHours(existing.getGeneratedTimeOff());
+
         existing.setDescription(updated.description());
         existing.setStartDateTime(updated.startDateTime());
         existing.setEndDateTime(updated.endDateTime());
@@ -218,7 +221,7 @@ public class WorkService {
             .atTime(23, 59, 59);
 
         return workRepository
-            .findByTaxEntityAndStartDateTimeBetween(tax, start, end)
+            .findByTaxEntityAndStartDateTimeBetweenOrderByRegistrationDateDesc(tax, start, end)
             .stream()
             .map(work -> {
 
