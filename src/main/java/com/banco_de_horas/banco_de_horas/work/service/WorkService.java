@@ -5,7 +5,7 @@ import com.banco_de_horas.banco_de_horas.holiday.repository.HolidayRepository;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
 import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
-import com.banco_de_horas.banco_de_horas.work.dto.MonthLyWorkSummaryDTO;
+import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkSummaryDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkItemDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkResponseDTO;
@@ -188,7 +188,7 @@ public class WorkService {
     /**
      * busca quantos serviços o fiscal fez no mês e quantas horas foram geradas
      */
-    public MonthLyWorkSummaryDTO getMonthLySummary(TaxEntity tax) {
+    public MonthlyWorkSummaryDTO getMonthLySummary(TaxEntity tax) {
         YearMonth currentMonth = YearMonth.now();
         LocalDateTime start = currentMonth
             .atDay(1)
@@ -201,7 +201,7 @@ public class WorkService {
         Long totalServices = workRepository.countByTaxAndPeriod(tax, start, end);
         BigDecimal totalHours = workRepository.sumHoursGeneratedByTaxAndPeriod(tax, start, end);
 
-        return new MonthLyWorkSummaryDTO(
+        return new MonthlyWorkSummaryDTO(
             totalServices,
             totalHours
         );
@@ -210,7 +210,6 @@ public class WorkService {
     /**
      * busca serviços do mês de um usuário
      */
-
     public List<MonthlyWorkItemDTO> getMonthlyWorks(TaxEntity tax) {
         YearMonth currentMonth = YearMonth.now();
         LocalDateTime start = currentMonth
@@ -221,7 +220,7 @@ public class WorkService {
             .atTime(23, 59, 59);
 
         return workRepository
-            .findByTaxEntityAndStartDateTimeBetweenOrderByRegistrationDateDesc(tax, start, end)
+            .findByTaxEntityAndRegistrationDateBetweenOrderByRegistrationDateDesc(tax, start, end)
             .stream()
             .map(work -> {
 
