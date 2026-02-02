@@ -102,7 +102,7 @@ public class DashboardController {
     }
 
     @PostMapping("/excluir/servico/{id}")
-    public String deleteWork(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deleteWork(@PathVariable Long id, RedirectAttributes redirectAttributes, @RequestParam Long taxId) {
         try {
             workService.delete(id);
             redirectAttributes.addFlashAttribute("successMessage",
@@ -111,13 +111,41 @@ public class DashboardController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao excluir feriado: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + id;
+        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
     @PostMapping("/fiscal/{taxId}/timeoff")
     public String createTimeOff(@PathVariable Long taxId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate, @RequestParam(required = false) BigDecimal partialHours) {
         TimeOffUsageRequestDTO dto = new TimeOffUsageRequestDTO(taxId, startDate, endDate, partialHours);
         timeOffUsageService.create(dto);
+
+        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
+    }
+
+    @PostMapping("/fiscal/{taxId}/editar/folga")
+    public String editTimeOff(
+        @PathVariable Long taxId,
+        @RequestParam Long timeOffId,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+        @RequestParam(required = false) BigDecimal partialHours) {
+
+        TimeOffUsageRequestDTO dto = new TimeOffUsageRequestDTO(taxId, startDate, endDate, partialHours);
+        timeOffUsageService.update(timeOffId, dto);
+
+        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
+    }
+
+    @PostMapping("/excluir/folga/{id}")
+    public String deleteTimeOff(@PathVariable Long id, @RequestParam Long taxId, RedirectAttributes redirectAttributes) {
+        try {
+            timeOffUsageService.delete(id);
+            redirectAttributes.addFlashAttribute("successMessage",
+                "Feriado excluído com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                "Erro ao excluir feriado: " + e.getMessage());
+        }
 
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
