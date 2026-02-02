@@ -56,24 +56,20 @@
         <!-- Card 2: Serviços Realizados -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-sm font-medium text-gray-600">Serviços Realizados</h2>
+                <h2 class="text-sm font-medium text-gray-600">Horas geradas</h2>
                 <img th:src="@{/images/check-circle.svg}" alt="Check" class="h-4 w-4"/>
             </div>
-            <div class="text-2xl font-bold text-gray-900 mb-1" th:text="${numberOfServicesInTheMonth}">0</div>
-            <div class="text-sm text-gray-500" th:text="${workingHoursPerMonth + ' geradas no mês'}">0.00 horas geradas
-                no mês
+            <div class="text-2xl font-bold text-gray-900" th:text="${generatedHours + ' geradas'}">0.00 horas geradas
             </div>
         </div>
 
         <!-- Card 3: Folgas Utilizadas -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-sm font-medium text-gray-600">Folgas Utilizadas</h2>
+                <h2 class="text-sm font-medium text-gray-600">Horas utilizadas</h2>
                 <img th:src="@{/images/calendar.svg}" alt="Calendário" class="h-4 w-4"/>
             </div>
-            <div class="text-2xl font-bold text-gray-900 mb-1" th:text="${NumberTimeOffSummaryIntheMonth}">0</div>
-            <div class="text-sm text-gray-500" th:text="${timeOffSummaryPerMonth + ' usadas no mês'}">0.00 horas usadas
-                no mês
+            <div class="text-2xl font-bold text-gray-900" th:text="${hoursUsed+ ' usadas'}">0.00 horas usadas
             </div>
         </div>
     </div>
