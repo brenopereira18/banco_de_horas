@@ -4,6 +4,7 @@ import com.banco_de_horas.banco_de_horas.holiday.dto.HolidayRequestDTO;
 import com.banco_de_horas.banco_de_horas.holiday.entity.HolidayEntity;
 import com.banco_de_horas.banco_de_horas.holiday.service.HolidayService;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxRequestDTO;
+import com.banco_de_horas.banco_de_horas.tax.dto.TaxResponseDTO;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.service.TaxService;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffUsageItemDTO;
@@ -44,7 +45,7 @@ public class DashboardController {
 
     @GetMapping("/administrador")
     public String showDashboard(Model model,  @RequestParam(defaultValue = "fiscais") String tab) {
-        List<TaxEntity> fiscais = taxService.getAllTax();
+        List<TaxResponseDTO> fiscais = taxService.getAllTax();
         List<HolidayEntity> feriados = holidayService.listAll();
 
         model.addAttribute("fiscais", fiscais);
