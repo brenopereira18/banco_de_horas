@@ -5,7 +5,6 @@ import com.banco_de_horas.banco_de_horas.holiday.repository.HolidayRepository;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
 import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
-import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkSummaryDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkItemDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkResponseDTO;
@@ -188,39 +187,16 @@ public class WorkService {
     /**
      * busca quantos serviços o fiscal fez no mês e quantas horas foram geradas
      */
-    public MonthlyWorkSummaryDTO getMonthLySummary(TaxEntity tax) {
-        YearMonth currentMonth = YearMonth.now();
-        LocalDateTime start = currentMonth
-            .atDay(1)
-            .atStartOfDay();
-
-        LocalDateTime end = currentMonth
-            .atEndOfMonth()
-            .atTime(23, 59, 59);
-
-        Long totalServices = workRepository.countByTaxAndPeriod(tax, start, end);
-        BigDecimal totalHours = workRepository.sumHoursGeneratedByTaxAndPeriod(tax, start, end);
-
-        return new MonthlyWorkSummaryDTO(
-            totalServices,
-            totalHours
-        );
+    public BigDecimal getNumberOfHoursGenerated(TaxEntity tax) {
+        return workRepository.sumAllHoursGeneratedByTax(tax);
     }
 
     /**
-     * busca serviços do mês de um usuário
+     * busca todos os serviços de um usuário ordenados por data de cadastro
      */
-    public List<MonthlyWorkItemDTO> getMonthlyWorks(TaxEntity tax) {
-        YearMonth currentMonth = YearMonth.now();
-        LocalDateTime start = currentMonth
-            .atDay(1)
-            .atStartOfDay();
-        LocalDateTime end = currentMonth
-            .atEndOfMonth()
-            .atTime(23, 59, 59);
-
+    public List<MonthlyWorkItemDTO> getAllWorks(TaxEntity tax) {
         return workRepository
-            .findByTaxEntityAndRegistrationDateBetweenOrderByRegistrationDateDesc(tax, start, end)
+            .findByTaxEntityOrderByRegistrationDateDesc(tax)
             .stream()
             .map(work -> {
 
