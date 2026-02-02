@@ -666,6 +666,10 @@ html {
   margin-top: 0.25rem;
 }
 
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
@@ -885,6 +889,10 @@ html {
   border-bottom-width: 2px;
 }
 
+.border-t {
+  border-top-width: 1px;
+}
+
 .border-blue-600 {
   --tw-border-opacity: 1;
   border-color: rgb(37 99 235 / var(--tw-border-opacity, 1));
@@ -1054,6 +1062,10 @@ html {
 
 .pl-4 {
   padding-left: 1rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
 }
 
 .text-center {
