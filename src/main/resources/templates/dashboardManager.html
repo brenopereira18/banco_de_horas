@@ -19,7 +19,7 @@
         </div>
         <a href="/logout"
            class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold transition-colors duration-200">
-            <span>→</span>
+            <img th:src="@{/images/arrow-right.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
             <span>Sair</span>
         </a>
     </header>
@@ -40,7 +40,22 @@
     <!-- Main Content Area: Lista de Fiscais -->
     <main th:if="${activeTab == 'fiscais'}" class="bg-white p-6 rounded-lg shadow-md">
         <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-800">Lista de Fiscais</h2>
+            <div class="flex items-center gap-4 flex-1">
+                <h2 class="text-xl font-semibold text-gray-800">Lista de Fiscais</h2>
+
+                <!-- Campo de Busca -->
+                <div class="flex-1 max-w-md">
+                    <div class="relative">
+                        <input type="text"
+                               id="searchFiscal"
+                               placeholder="Buscar fiscal por nome..."
+                               class="w-48 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <img th:src="@{/images/search.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <button onclick="toggleModal(true)"
                     class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                 <img th:src="@{/images/user-plus.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
@@ -48,40 +63,42 @@
             </button>
         </div>
 
-        <div th:unless="${fiscais.isEmpty()}">
-
+        <div id="fiscalList">
             <div th:each="fiscal : ${fiscais}"
-                 class="flex items-center justify-between p-2 border-b border-gray-150 last:border-b-0 hover:bg-gray-100 rounded-md transition-colors duration-150">
+                 class="fiscal-item flex items-center justify-between p-2 border-b border-gray-150 last:border-b-0 hover:bg-gray-100 rounded-md transition-colors duration-150"
+                 th:data-name="${fiscal.fullName()}">
 
                 <!-- Dados do Fiscal -->
                 <div class="flex-1">
                     <p class="font-semibold text-gray-700"
-                       th:text="${fiscal.fullName}">
+                       th:text="${fiscal.fullName()}">
                         Nome Completo do Fiscal
                     </p>
 
-                    <p class="text-sm text-gray-500">
+                    <p class="text-sm text-green-600">
                         Saldo de Horas:
                         <span class="font-medium"
-                              th:text="${#numbers.formatDecimal(fiscal.getBalanceOfHours(), 1, 'POINT', 2, 'COMMA')}">
-                            0,00
-                        </span>
-                        horas
+                              th:text="${fiscal.balanceOfHours()}">
+                    0,00
+                </span>
                     </p>
                 </div>
 
-                <a th:href="@{/banco_de_horas/dashboard/fiscal/{id}(id=${fiscal.id})}"
+                <a th:href="@{/banco_de_horas/dashboard/fiscal/{id}(id=${fiscal.id()})}"
                    class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200">
                     Ver Detalhes
                 </a>
-
             </div>
         </div>
 
-        <!-- Caso não existam fiscais -->
-        <div th:if="${fiscais.isEmpty()}"
-             class="p-6 text-center text-gray-500">
-            Nenhum fiscal cadastrado.
+        <!-- Mensagem quando não há resultados da busca -->
+        <div id="noResults" class="hidden text-center py-8 text-gray-500">
+            <p>Nenhum fiscal encontrado.</p>
+        </div>
+
+        <!-- Mensagem quando não existem fiscais cadastrados -->
+        <div th:if="${fiscais.isEmpty()}" class="text-center py-8 text-gray-500">
+            <p>Nenhum fiscal cadastrado.</p>
         </div>
     </main>
 
@@ -277,6 +294,39 @@
 </div>
 
 <script>
+    const searchInput = document.getElementById('searchFiscal');
+    const fiscalItems = document.querySelectorAll('.fiscal-item');
+    const noResults = document.getElementById('noResults');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            let hasResults = false;
+
+            fiscalItems.forEach(item => {
+                const fiscalName = item.getAttribute('data-name').toLowerCase();
+
+                // Busca apenas no início do nome (ou início de cada palavra)
+                const words = fiscalName.split(' ');
+                const matchesStart = words.some(word => word.startsWith(searchTerm));
+
+                if (matchesStart) {
+                    item.style.display = 'flex';
+                    hasResults = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Mostrar/ocultar mensagem de "sem resultados"
+            if (hasResults || searchTerm === '') {
+                noResults.classList.add('hidden');
+            } else {
+                noResults.classList.remove('hidden');
+            }
+        });
+    }
+
     function toggleModal(show) {
         const modal = document.getElementById('addFiscalModal');
         const body = document.body;
