@@ -12,32 +12,11 @@ import java.util.List;
 
 public interface WorkRepository extends JpaRepository<WorkEntity, Long> {
     @Query("""
-        SELECT COUNT(w)
-        FROM WorkEntity w
-        WHERE w.taxEntity = :tax
-          AND w.startDateTime BETWEEN :start AND :end
-    """)
-    Long countByTaxAndPeriod(
-        @Param("tax") TaxEntity tax,
-        @Param("start") LocalDateTime start,
-        @Param("end") LocalDateTime end
-    );
-
-    @Query("""
         SELECT COALESCE(SUM(w.generatedTimeOff), 0)
         FROM WorkEntity w
         WHERE w.taxEntity = :tax
-          AND w.startDateTime BETWEEN :start AND :end
     """)
-    BigDecimal sumHoursGeneratedByTaxAndPeriod(
-        @Param("tax") TaxEntity tax,
-        @Param("start") LocalDateTime start,
-        @Param("end") LocalDateTime end
-    );
+    BigDecimal sumAllHoursGeneratedByTax(@Param("tax") TaxEntity tax);
 
-    List<WorkEntity> findByTaxEntityAndRegistrationDateBetweenOrderByRegistrationDateDesc(
-        TaxEntity tax,
-        LocalDateTime start,
-        LocalDateTime end
-    );
+    List<WorkEntity> findByTaxEntityOrderByRegistrationDateDesc(TaxEntity tax);
 }
