@@ -202,4 +202,14 @@ public class TimeOffUsageService {
             ))
             .toList();
     }
+
+    public void delete(Long id) {
+        TimeOffUsageEntity existing = timeOffUsageRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Folga não encontrada"));
+
+        TaxEntity tax = existing.getTaxEntity();
+        tax.addHours(existing.getHoursUsed());
+        taxRepository.save(tax);
+        timeOffUsageRepository.delete(existing);
+    }
 }
