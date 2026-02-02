@@ -2,7 +2,7 @@ package com.banco_de_horas.banco_de_horas.tax.entity;
 
 public enum UserType {
     FISCAL("Fiscal"),
-    SUPERVISOR("SUpervisor"),
+    SUPERVISOR("Supervisor"),
     ADMINISTRADOR("Administrador");
 
     private String userType;
