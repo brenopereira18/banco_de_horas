@@ -7,30 +7,38 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface TimeOffUsageRepository extends JpaRepository<TimeOffUsageEntity, Long> {
     @Query("""
         SELECT COUNT(t)
         FROM TimeOffUsageEntity t
         WHERE t.taxEntity = :tax
-          AND t.startDateTime BETWEEN :start AND :end
+          AND t.startDate BETWEEN :start AND :end
     """)
     Long countByTaxAndPeriod(
         @Param("tax") TaxEntity tax,
-        @Param("start") LocalDateTime start,
-        @Param("end") LocalDateTime end
+        @Param("start") LocalDate start,
+        @Param("end") LocalDate end
     );
 
     @Query("""
         SELECT COALESCE(SUM(t.hoursUsed), 0)
         FROM TimeOffUsageEntity t
         WHERE t.taxEntity = :tax
-          AND t.startDateTime BETWEEN :start AND :end
+          AND t.startDate BETWEEN :start AND :end
     """)
     BigDecimal sumHoursUsedByTaxAndPeriod(
         @Param("tax") TaxEntity tax,
-        @Param("start") LocalDateTime start,
-        @Param("end") LocalDateTime end
+        @Param("start") LocalDate start,
+        @Param("end") LocalDate end
+    );
+
+    List<TimeOffUsageEntity> findByTaxEntityAndRegistrationDateBetweenOrderByRegistrationDateDesc(
+        TaxEntity tax,
+        LocalDateTime start,
+        LocalDateTime end
     );
 }

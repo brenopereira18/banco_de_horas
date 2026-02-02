@@ -6,10 +6,12 @@ import com.banco_de_horas.banco_de_horas.holiday.service.HolidayService;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.service.TaxService;
-import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthLyTimeOffSummaryDTO;
+import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffSummaryDTO;
+import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffUsageItemDTO;
+import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.TimeOffUsageRequestDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.service.TimeOffUsageService;
 import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
-import com.banco_de_horas.banco_de_horas.work.dto.MonthLyWorkSummaryDTO;
+import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkSummaryDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkItemDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.service.WorkService;
@@ -20,6 +22,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -55,10 +59,12 @@ public class DashboardController {
     public String showFiscalDetails(@PathVariable Long id, Model model) {
         try {
             TaxEntity tax = taxService.findById(id);
-            MonthLyWorkSummaryDTO workSummary = workService.getMonthLySummary(tax);
+            MonthlyWorkSummaryDTO workSummary = workService.getMonthLySummary(tax);
             List<MonthlyWorkItemDTO> works = workService.getMonthlyWorks(tax);
-            MonthLyTimeOffSummaryDTO  timeOffSummary = timeOffUsageService.getMonthLySummary(tax);
+            MonthlyTimeOffSummaryDTO timeOffSummary = timeOffUsageService.getMonthlySummary(tax);
+            List<MonthlyTimeOffUsageItemDTO> timeOffUsage = timeOffUsageService.getMonthlyTimeUsage(tax);
 
+            model.addAttribute("daysOffPerMonth", timeOffUsage);
             model.addAttribute("formattedBalance", TimeFormatUtils.formatHours(tax.getBalanceOfHours()));
             model.addAttribute("timeOffSummaryPerMonth", TimeFormatUtils.formatHours(timeOffSummary.totalHoursUsed()));
             model.addAttribute("NumberTimeOffSummaryIntheMonth", timeOffSummary.totalTimeOffs());
@@ -71,7 +77,8 @@ public class DashboardController {
             return "dashboardTax";
 
         } catch (Exception e) {
-            return "redirect:/banco_de_horas/dashboard/administrador?error=FiscalNotFound";
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -105,6 +112,14 @@ public class DashboardController {
                 "Erro ao excluir feriado: " + e.getMessage());
         }
         return "redirect:/banco_de_horas/dashboard/fiscal/" + id;
+    }
+
+    @PostMapping("/fiscal/{taxId}/timeoff")
+    public String createTimeOff(@PathVariable Long taxId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate, @RequestParam(required = false) BigDecimal partialHours) {
+        TimeOffUsageRequestDTO dto = new TimeOffUsageRequestDTO(taxId, startDate, endDate, partialHours);
+        timeOffUsageService.create(dto);
+
+        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
     @PostMapping("/fiscal/{id}/work")
