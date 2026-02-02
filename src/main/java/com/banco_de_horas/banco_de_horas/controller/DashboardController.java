@@ -6,12 +6,10 @@ import com.banco_de_horas.banco_de_horas.holiday.service.HolidayService;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.service.TaxService;
-import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffSummaryDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffUsageItemDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.TimeOffUsageRequestDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.service.TimeOffUsageService;
 import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
-import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkSummaryDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkItemDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.service.WorkService;
@@ -59,17 +57,15 @@ public class DashboardController {
     public String showFiscalDetails(@PathVariable Long id, Model model) {
         try {
             TaxEntity tax = taxService.findById(id);
-            MonthlyWorkSummaryDTO workSummary = workService.getMonthLySummary(tax);
-            List<MonthlyWorkItemDTO> works = workService.getMonthlyWorks(tax);
-            MonthlyTimeOffSummaryDTO timeOffSummary = timeOffUsageService.getMonthlySummary(tax);
-            List<MonthlyTimeOffUsageItemDTO> timeOffUsage = timeOffUsageService.getMonthlyTimeUsage(tax);
+            BigDecimal generatedHours = workService.getNumberOfHoursGenerated(tax);
+            List<MonthlyWorkItemDTO> works = workService.getAllWorks(tax);
+            BigDecimal hoursUsed = timeOffUsageService.getHoursUsed(tax);
+            List<MonthlyTimeOffUsageItemDTO> timeOffUsage = timeOffUsageService.getAllTimeUsage(tax);
 
             model.addAttribute("daysOffPerMonth", timeOffUsage);
             model.addAttribute("formattedBalance", TimeFormatUtils.formatHours(tax.getBalanceOfHours()));
-            model.addAttribute("timeOffSummaryPerMonth", TimeFormatUtils.formatHours(timeOffSummary.totalHoursUsed()));
-            model.addAttribute("NumberTimeOffSummaryIntheMonth", timeOffSummary.totalTimeOffs());
-            model.addAttribute("workingHoursPerMonth", TimeFormatUtils.formatHours(workSummary.totalHoursGenerated()));
-            model.addAttribute("numberOfServicesInTheMonth", workSummary.totalServices());
+            model.addAttribute("hoursUsed", TimeFormatUtils.formatHours(hoursUsed));
+            model.addAttribute("generatedHours", TimeFormatUtils.formatHours(generatedHours));
             model.addAttribute("fiscal", tax);
             model.addAttribute("works", works);
             model.addAttribute("userName", "Eduardo");
