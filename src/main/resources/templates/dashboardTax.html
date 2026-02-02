@@ -12,7 +12,8 @@
     <!-- Header Section -->
     <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard - <span th:text="${fiscal.getUserType().getUserType()}"></span></h1>
+            <h1 class="text-2xl font-bold text-gray-900">Dashboard - <span
+                    th:text="${fiscal.getUserType().getUserType()}"></span></h1>
             <p class="text-lg text-gray-600 mt-1">
                 Bem-vindo, <span th:text="${fiscal.fullName}">Breno Pereira Betti</span>
             </p>
@@ -155,6 +156,33 @@
                 </div>
             </div>
 
+            <!-- Controles de Paginação (APENAS para serviços) -->
+            <div th:if="${totalPages > 1}"
+                 class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+                <a th:if="${hasPrevious}"
+                   th:href="@{/banco_de_horas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage - 1})}"
+                   class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
+                    ← Anterior
+                </a>
+                <span th:unless="${hasPrevious}"
+                      class="px-4 py-2 text-gray-400 text-sm">
+                    ← Anterior
+                </span>
+
+                <span class="text-sm text-gray-600">
+                    Página <span th:text="${currentPage + 1}">1</span> de <span th:text="${totalPages}">5</span>
+                </span>
+
+                <a th:if="${hasNext}"
+                   th:href="@{/banco_de_horas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage + 1})}"
+                   class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
+                    Próximo →
+                </a>
+                <span th:unless="${hasNext}"
+                      class="px-4 py-2 text-gray-400 text-sm">
+                    Próximo →
+                </span>
+            </div>
         </div>
 
         <!-- Coluna Direita: Histórico de Folgas -->
@@ -234,6 +262,34 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Controles de Paginação para Folgas -->
+            <div th:if="${timeOffTotalPages > 1}"
+                 class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+                <a th:if="${timeOffHasPrevious}"
+                   th:href="@{/banco_de_horas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage}, timeOffPage=${timeOffCurrentPage - 1})}"
+                   class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
+                    ← Anterior
+                </a>
+                <span th:unless="${timeOffHasPrevious}"
+                      class="px-4 py-2 text-gray-400 text-sm">
+                    ← Anterior
+                </span>
+
+                <span class="text-sm text-gray-600">
+                    Página <span th:text="${timeOffCurrentPage + 1}">1</span> de <span th:text="${timeOffTotalPages}">5</span>
+                </span>
+
+                <a th:if="${timeOffHasNext}"
+                   th:href="@{/banco_de_horas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage}, timeOffPage=${timeOffCurrentPage + 1})}"
+                   class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
+                    Próximo →
+                </a>
+                <span th:unless="${timeOffHasNext}"
+                      class="px-4 py-2 text-gray-400 text-sm">
+                    Próximo →
+                </span>
             </div>
         </div>
     </div>

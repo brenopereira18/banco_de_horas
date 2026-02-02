@@ -14,6 +14,7 @@ import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkItemDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.service.WorkService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -54,20 +55,38 @@ public class DashboardController {
     }
 
     @GetMapping("/fiscal/{id}")
-    public String showFiscalDetails(@PathVariable Long id, Model model) {
+    public String showFiscalDetails(@PathVariable Long id, Model model, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "0") int timeOffPage) {
         try {
             TaxEntity tax = taxService.findById(id);
             BigDecimal generatedHours = workService.getNumberOfHoursGenerated(tax);
-            List<MonthlyWorkItemDTO> works = workService.getAllWorks(tax);
-            BigDecimal hoursUsed = timeOffUsageService.getHoursUsed(tax);
-            List<MonthlyTimeOffUsageItemDTO> timeOffUsage = timeOffUsageService.getAllTimeUsage(tax);
 
-            model.addAttribute("daysOffPerMonth", timeOffUsage);
+            // Paginação de serviços
+            Page<MonthlyWorkItemDTO> worksPage = workService.getAllWorks(tax, page, 10);
+
+            // Paginação de folgas
+            Page<MonthlyTimeOffUsageItemDTO> timeOffUsage = timeOffUsageService.getAllTimeUsage(tax, timeOffPage, 10);
+
+            BigDecimal hoursUsed = timeOffUsageService.getHoursUsed(tax);
+
+            // Atributos de serviços
+            model.addAttribute("works", worksPage.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", worksPage.getTotalPages());
+            model.addAttribute("hasNext", worksPage.hasNext());
+            model.addAttribute("hasPrevious", worksPage.hasPrevious());
+
+            // Atributos de folgas
+            model.addAttribute("daysOffPerMonth", timeOffUsage.getContent());
+            model.addAttribute("timeOffCurrentPage", timeOffPage);
+            model.addAttribute("timeOffTotalPages", timeOffUsage.getTotalPages());
+            model.addAttribute("timeOffHasNext", timeOffUsage.hasNext());
+            model.addAttribute("timeOffHasPrevious", timeOffUsage.hasPrevious());
+
+            // Outros atributos
             model.addAttribute("formattedBalance", TimeFormatUtils.formatHours(tax.getBalanceOfHours()));
             model.addAttribute("hoursUsed", TimeFormatUtils.formatHours(hoursUsed));
             model.addAttribute("generatedHours", TimeFormatUtils.formatHours(generatedHours));
             model.addAttribute("fiscal", tax);
-            model.addAttribute("works", works);
             model.addAttribute("userName", "Eduardo");
 
             return "dashboardTax";
