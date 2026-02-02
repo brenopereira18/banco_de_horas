@@ -8,6 +8,9 @@ import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.TimeOffUsageRequestDTO
 import com.banco_de_horas.banco_de_horas.timeOffUsage.entity.TimeOffUsageEntity;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.repository.TimeOffUsageRepository;
 import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -168,10 +171,11 @@ public class TimeOffUsageService {
     /**
      * busca folgas do usuário por ordem de cadastro
      */
-    public List<MonthlyTimeOffUsageItemDTO> getAllTimeUsage(TaxEntity tax) {
+    public Page<MonthlyTimeOffUsageItemDTO> getAllTimeUsage(TaxEntity tax, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
         return timeOffUsageRepository
-            .findByTaxEntityOrderByRegistrationDateDesc(tax)
-            .stream()
+            .findByTaxEntityOrderByRegistrationDateDesc(tax, pageable)
             .map(usage -> new MonthlyTimeOffUsageItemDTO(
                 usage.getId(),
                 usage.getStartDate(),
@@ -179,8 +183,7 @@ public class TimeOffUsageService {
                 usage.getHoursUsed(),
                 usage.getFractionalHours(),
                 TimeFormatUtils.formatHours(usage.getHoursUsed())
-            ))
-            .toList();
+            ));
     }
 
     public void delete(Long id) {

@@ -10,6 +10,9 @@ import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkResponseDTO;
 import com.banco_de_horas.banco_de_horas.work.entity.WorkEntity;
 import com.banco_de_horas.banco_de_horas.work.repository.WorkRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -194,12 +197,12 @@ public class WorkService {
     /**
      * busca todos os serviços de um usuário ordenados por data de cadastro
      */
-    public List<MonthlyWorkItemDTO> getAllWorks(TaxEntity tax) {
-        return workRepository
-            .findByTaxEntityOrderByRegistrationDateDesc(tax)
-            .stream()
-            .map(work -> {
+    public Page<MonthlyWorkItemDTO> getAllWorks(TaxEntity tax, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
+        return workRepository
+            .findByTaxEntityOrderByRegistrationDateDesc(tax, pageable)
+            .map(work -> {
                 boolean isHoliday = hasHoliday(
                     work.getStartDateTime(),
                     work.getEndDateTime()
@@ -214,8 +217,7 @@ public class WorkService {
                     work.getGeneratedTimeOff(),
                     TimeFormatUtils.formatHours(work.getGeneratedTimeOff())
                 );
-            })
-            .toList();
+            });
     }
 
     private boolean hasHoliday(LocalDateTime start, LocalDateTime end) {
