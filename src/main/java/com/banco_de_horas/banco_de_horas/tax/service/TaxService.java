@@ -3,8 +3,10 @@ package com.banco_de_horas.banco_de_horas.tax.service;
 import com.banco_de_horas.banco_de_horas.exceptions.EntityAlreadyExists;
 import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxRequestDTO;
+import com.banco_de_horas.banco_de_horas.tax.dto.TaxResponseDTO;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
+import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,8 +37,16 @@ public class TaxService {
     }
 
     @Transactional(readOnly = true)
-    public List<TaxEntity> getAllTax() {
-        return this.taxRepository.findAll();
+    public List<TaxResponseDTO> getAllTax() {
+        return this.taxRepository.findAll()
+            .stream()
+            .map(tax -> {
+                return new TaxResponseDTO(
+                    tax.getId(),
+                    tax.getFullName(),
+                    TimeFormatUtils.formatHours(tax.getBalanceOfHours())
+                );
+            }).toList();
     }
 
     public TaxEntity update(Long id, TaxRequestDTO dto) {
