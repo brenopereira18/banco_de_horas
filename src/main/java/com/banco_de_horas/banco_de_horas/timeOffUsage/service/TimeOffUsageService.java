@@ -2,20 +2,23 @@ package com.banco_de_horas.banco_de_horas.timeOffUsage.service;
 
 import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
-import com.banco_de_horas.banco_de_horas.tax.entity.UserType;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
-import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthLyTimeOffSummaryDTO;
+import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffSummaryDTO;
+import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffUsageItemDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.TimeOffUsageRequestDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.entity.TimeOffUsageEntity;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.repository.TimeOffUsageRepository;
+import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @Transactional
@@ -27,21 +30,25 @@ public class TimeOffUsageService {
     @Autowired
     private TaxRepository taxRepository;
 
+    /**
+     * Cria folga
+     */
     public TimeOffUsageEntity create(TimeOffUsageRequestDTO dto) {
         TaxEntity tax = taxRepository.findById(dto.taxId())
             .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
 
-        long daysOff = calculateDaysOff(
-            dto.startDateTime(),
-            dto.endDateTime()
+        BigDecimal hoursToDebit = calculateHours(
+            dto.startDate(),
+            dto.endDate(),
+            dto.fractionalHours(),
+            tax
         );
-
-        BigDecimal hoursToDebit = convertDaysToHours(daysOff, tax.getUserType());
 
         TimeOffUsageEntity usage = TimeOffUsageEntity.builder()
             .taxEntity(tax)
-            .startDateTime(dto.startDateTime())
-            .endDateTime(dto.endDateTime())
+            .startDate(dto.startDate())
+            .endDate(dto.endDate())
+            .fractionalHours(dto.fractionalHours())
             .hoursUsed(hoursToDebit)
             .build();
 
@@ -50,41 +57,76 @@ public class TimeOffUsageService {
     }
 
     /**
-     * Atualização de uso de folga
+     * Atualiza folga
      */
     public TimeOffUsageEntity update(Long id, TimeOffUsageRequestDTO dto) {
 
         TimeOffUsageEntity existing = timeOffUsageRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Uso de folga não encontrado"));
 
-        // Reverte saldo antigo
         restoreTaxBalance(existing);
 
-        // Atualiza datas
-        existing.setStartDateTime(dto.startDateTime());
-        existing.setEndDateTime(dto.endDateTime());
+        existing.setStartDate(dto.startDate());
+        existing.setEndDate(dto.endDate());
+        existing.setFractionalHours(dto.fractionalHours());
 
-        // Recalcula horas administrativas
-        long daysOff = calculateDaysOff(
-            dto.startDateTime(),
-            dto.endDateTime()
+        BigDecimal hoursToDebit = calculateHours(
+            dto.startDate(),
+            dto.endDate(),
+            dto.fractionalHours(),
+            existing.getTaxEntity()
         );
-
-        BigDecimal hoursToDebit = convertDaysToHours(
-            daysOff,
-            existing.getTaxEntity().getUserType()
-        );
-
         existing.setHoursUsed(hoursToDebit);
-
-        // Aplica regras novamente
         applyBusinessRules(existing);
 
         return timeOffUsageRepository.save(existing);
     }
 
     /**
-     * Aplica regras de negócio e debita saldo
+     * Calcula horas usadas na folga
+     */
+    private BigDecimal calculateHours(LocalDate start, LocalDate end, BigDecimal fractional,
+        TaxEntity tax) {
+        if (start == null) {
+            throw new IllegalArgumentException("Data inicial obrigatória");
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal hoursPerDay = getDailyLimit(tax);
+
+        // dias
+        if (end != null) {
+            if (end.isBefore(start)) {
+                throw new IllegalArgumentException("Data final inválida");
+            }
+
+            long days = ChronoUnit.DAYS.between(start, end) + 1;
+
+            total = total.add(
+                hoursPerDay.multiply(BigDecimal.valueOf(days))
+            );
+        }
+
+        // horas extras
+        if (fractional != null && fractional.compareTo(BigDecimal.ZERO) > 0) {
+            total = total.add(fractional);
+        }
+
+        return total;
+    }
+
+    /**
+     * limite de horas por dia
+     */
+    private BigDecimal getDailyLimit(TaxEntity tax) {
+        return switch (tax.getUserType()) {
+            case FISCAL -> BigDecimal.valueOf(6);
+            case SUPERVISOR, ADMINISTRADOR -> BigDecimal.valueOf(8);
+        };
+    }
+
+    /**
+     * Aplica regras e debita saldo
      */
     private void applyBusinessRules(TimeOffUsageEntity usage) {
 
@@ -104,9 +146,10 @@ public class TimeOffUsageService {
     }
 
     /**
-     * Reverte saldo quando um uso de folga é alterado
+     * Reverte saldo
      */
     private void restoreTaxBalance(TimeOffUsageEntity usage) {
+
         BigDecimal hoursUsed = usage.getHoursUsed();
 
         if (hoursUsed != null && hoursUsed.compareTo(BigDecimal.ZERO) > 0) {
@@ -117,44 +160,12 @@ public class TimeOffUsageService {
     }
 
     /**
-     * Calcula dias administrativos (datas inclusivas)
-     */
-    private long calculateDaysOff(LocalDateTime start, LocalDateTime end) {
-        if (end.isBefore(start)) {
-            throw new IllegalArgumentException("Data final não pode ser anterior à data inicial");
-        }
-
-        return ChronoUnit.DAYS.between(
-            start.toLocalDate(),
-            end.toLocalDate()
-        ) + 1;
-    }
-
-    /**
-     * Converte dias administrativos em horas conforme o tipo do usuário
-     */
-    private BigDecimal convertDaysToHours(long days, UserType userType) {
-        BigDecimal hoursPerDay = switch (userType) {
-            case FISCAL -> BigDecimal.valueOf(6);
-            case SUPERVISOR, ADMINISTRADOR -> BigDecimal.valueOf(8);
-        };
-
-        return hoursPerDay.multiply(BigDecimal.valueOf(days));
-    }
-
-    /**
      * Conta quantas folgas e horas foram usadas no mês
      */
-    public MonthLyTimeOffSummaryDTO getMonthLySummary(TaxEntity tax) {
+    public MonthlyTimeOffSummaryDTO getMonthlySummary(TaxEntity tax) {
         YearMonth currentMonth = YearMonth.now();
-
-        LocalDateTime start = currentMonth
-            .atDay(1)
-            .atStartOfDay();
-
-        LocalDateTime end = currentMonth
-            .atEndOfMonth()
-            .atTime(23, 59, 59);
+        LocalDate start = currentMonth.atDay(1);
+        LocalDate end = currentMonth.atEndOfMonth();
 
         Long totalTimeOffs =
             timeOffUsageRepository.countByTaxAndPeriod(tax, start, end);
@@ -162,9 +173,33 @@ public class TimeOffUsageService {
         BigDecimal totalHoursUsed =
             timeOffUsageRepository.sumHoursUsedByTaxAndPeriod(tax, start, end);
 
-        return new MonthLyTimeOffSummaryDTO(
+        return new MonthlyTimeOffSummaryDTO(
             totalTimeOffs,
             totalHoursUsed
         );
+    }
+
+    /**
+     * busca folgas do mês de um usuário
+     */
+    public List<MonthlyTimeOffUsageItemDTO> getMonthlyTimeUsage(TaxEntity tax) {
+        YearMonth month = YearMonth.now();
+        LocalDateTime start = month.atDay(1).atStartOfDay();
+        LocalDateTime end = month.atEndOfMonth().atTime(23, 59, 59);
+
+        return timeOffUsageRepository
+            .findByTaxEntityAndRegistrationDateBetweenOrderByRegistrationDateDesc(
+                tax, start, end
+            )
+            .stream()
+            .map(usage -> new MonthlyTimeOffUsageItemDTO(
+                usage.getId(),
+                usage.getStartDate(),
+                usage.getEndDate(),
+                usage.getHoursUsed(),
+                usage.getFractionalHours(),
+                TimeFormatUtils.formatHours(usage.getHoursUsed())
+            ))
+            .toList();
     }
 }
