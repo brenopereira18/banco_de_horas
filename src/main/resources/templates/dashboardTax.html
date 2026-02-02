@@ -12,7 +12,7 @@
     <!-- Header Section -->
     <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard - Fiscal</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Dashboard - <span th:text="${fiscal.getUserType().getUserType()}"></span></h1>
             <p class="text-lg text-gray-600 mt-1">
                 Bem-vindo, <span th:text="${fiscal.fullName}">Breno Pereira Betti</span>
             </p>
@@ -22,7 +22,7 @@
             <!-- Botão Voltar -->
             <a href="/banco_de_horas/dashboard/administrador"
                class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold transition-colors duration-200">
-                <span>←</span>
+                <img th:src="@{/images/arrow-left.svg}" alt="Relógio" class="h-4 w-4"/>
                 <span>Voltar</span>
             </a>
 
@@ -119,12 +119,13 @@
                                 </span>
                             </p>
 
-                            <span class="text-sm text-gray-500 mb-1" th:text="${#temporals.format(work.startDateTime, 'EEEE')}"></span>
+                            <span class="text-sm text-gray-500 mb-1"
+                                  th:text="${#temporals.format(work.startDateTime, 'EEEE')}"></span>
 
                             <!-- Horas geradas -->
                             <div class="flex items-center space-x-4">
                                 <span class="text-sm font-medium text-green-600"
-                                    th:text="'+' + ${work.formattedGeneratedTimeOff()}">
+                                      th:text="'+' + ${work.formattedGeneratedTimeOff()}">
                                     +8,0 horas
                                 </span>
                             </div>
@@ -169,68 +170,71 @@
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-semibold text-gray-800">Histórico de Folgas</h2>
-                <button class="px-4 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 transition-colors duration-200">
+                <button onclick="toggleTimeOffModal(true)"
+                        class="px-4 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700">
                     + Usar Folga
                 </button>
             </div>
 
             <!-- Lista de Folgas -->
             <div class="space-y-4">
-                <!-- Item de Folga -->
-                <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <h3 class="font-medium text-gray-900 mb-1">Folga Compensatória</h3>
-                            <p class="text-sm text-gray-500 mb-2">20/01/2026 • Dia completo</p>
-                            <div class="flex items-center space-x-4">
-                                <span class="text-sm font-medium text-orange-600">-8,0 horas</span>
-                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Utilizada</span>
-                            </div>
-                        </div>
-                        <button class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                <div th:each="item : ${daysOffPerMonth}"
+                     class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
 
-                <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-                            <h3 class="font-medium text-gray-900 mb-1">Meio Período</h3>
-                            <p class="text-sm text-gray-500 mb-2">18/01/2026 • 13:00 - 17:00</p>
-                            <div class="flex items-center space-x-4">
-                                <span class="text-sm font-medium text-orange-600">-4,0 horas</span>
-                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Utilizada</span>
-                            </div>
-                        </div>
-                        <button class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
 
-                <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <h3 class="font-medium text-gray-900 mb-1">Folga Compensatória</h3>
-                            <p class="text-sm text-gray-500 mb-2">15/01/2026 • Dia completo</p>
+                            <!-- Datas -->
+                            <p class="text-sm text-gray-500"
+                               th:with="hasEnd=${item.endDate != null}, end=${hasEnd ? item.endDate : item.startDate}, onlyHours=${item.endDate == null && item.fractionalHours != null},
+                                days=${hasEnd ? T(java.time.temporal.ChronoUnit).DAYS.between(item.startDate, end) + 1 : 0}">
+
+                                <!-- Datas -->
+                                <span th:if="${item.startDate.equals(end)}"
+                                      th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')}">
+                                </span>
+
+                                <span th:if="${!item.startDate.equals(end)}"
+                                      th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')
+                                        + ' até ' + #temporals.format(end, 'dd/MM/yyyy')}">
+                                </span>
+
+                                <!-- Dias (só mostra se NÃO for apenas horas) -->
+                                <span th:if="${days > 0 && !onlyHours}">
+                                    • <span th:text="${days == 1 ? '1 dia' : days + ' dias'}"></span>
+                                </span>
+
+                                <!-- Horas -->
+                                <span th:if="${item.fractionalHours != null}">
+                                    • <span th:text="${item.fractionalHours} + 'h'"></span>
+                                </span>
+                            </p>
+
                             <div class="flex items-center space-x-4">
-                                <span class="text-sm font-medium text-orange-600">-8,0 horas</span>
-                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Utilizada</span>
+                                <span class="text-sm font-medium text-orange-600"
+                                      th:text="'-' + ${item.formattedHours()}">
+                                </span>
                             </div>
                         </div>
-                        <button class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                            </svg>
-                        </button>
+
+                        <!-- Menu de Ações -->
+                        <div class="flex space-x-1 items-center">
+                            <button class="p-1 text-gray-400 hover:text-yellow-600"
+                                    title="Editar">
+                                <img th:src="@{/images/edit.svg}" class="h-4 w-4"/>
+                            </button>
+                            <form th:action="@{/banco_de_horas/dashboard/excluir/folga/{id}(id=${item.id})}"
+                                  method="POST"
+                                  style="display: inline;"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este serviço? Esta ação é irreversível.')">
+                                <input type="hidden" name="_method" value="DELETE"/>
+                                <button type="submit"
+                                        class="p-1 text-gray-400 hover:text-red-600 transition-colors duration-200"
+                                        title="Excluir">
+                                    <img th:src="@{/images/trash-2.svg}" alt="Excluir" class="h-4 w-4"/>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -244,6 +248,72 @@
         </div>
     </div>
 
+    <!-- Cadastrar folga -->
+    <div id="addTimeOffModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
+        <div class="flex items-center justify-center min-h-full p-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4">Usar Folga</h3>
+
+                <form th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/timeoff(taxId=${fiscal.id})}"
+                      method="POST">
+
+                    <div class="mb-4">
+                        <label class="block mb-2">Data início:</label>
+                        <input type="date"
+                               name="startDate"
+                               class="w-full border p-2 rounded"
+                               required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block mb-2">
+                            Data fim (opcional):
+                        </label>
+                        <input type="date"
+                               name="endDate"
+                               class="w-full border p-2 rounded">
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block mb-2">
+                            Horas fracionadas (opcional):
+                        </label>
+                        <input type="number"
+                               step="0.5"
+                               min="0"
+                               name="partialHours"
+                               placeholder="Ex: 3"
+                               class="w-full border p-2 rounded">
+                    </div>
+
+                    <div class="mb-4 text-xs text-gray-500 bg-gray-50 p-3">
+                        Regras:
+                        <ul class="list-disc pl-4 mt-1 space-y-1">
+                            <li>- Para folga de 1 dia, repita a mesma data no início e fim.</li>
+                            <li>- Para vários dias, informe o intervalo.</li>
+                            <li>- Use horas fracionadas para acrescentar horas extras.</li>
+                            <li>- Se quiser apenas horas, preencha só data de início e as horas fracionadas.</li>
+                        </ul>
+                    </div>
+
+                    <div class="flex justify-end gap-2">
+                        <button type="button"
+                                onclick="toggleTimeOffModal(false)"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
+                            Cancelar
+                        </button>
+
+                        <button type="submit"
+                                class="bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-md px-4 py-2 transition-colors duration-200">
+                            Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cadastro de serviço -->
     <div id="addServiceModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
         <div class="flex items-center justify-center min-h-full p-4">
             <div class="bg-white rounded-lg p-6 w-full max-w-md">
@@ -295,6 +365,7 @@
         </div>
     </div>
 
+    <!-- Edição de serviço -->
     <div id="editServiceModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
         <div class="flex items-center justify-center min-h-full p-4">
             <div class="bg-white rounded-lg p-6 w-full max-w-md">
@@ -459,11 +530,21 @@
     }
 
     // Fechar modal ao clicar fora dela
-    document.getElementById('editServiceModal')?.addEventListener('click', function(e) {
+    document.getElementById('editServiceModal')?.addEventListener('click', function (e) {
         if (e.target === this) {
             toggleEditModal(false);
         }
     });
+
+    function toggleTimeOffModal(show) {
+        const modal = document.getElementById('addTimeOffModal');
+        modal.classList.toggle('hidden', !show);
+    }
+
+    document.getElementById('addTimeOffModal')
+        ?.addEventListener('click', function (e) {
+            if (e.target === this) toggleTimeOffModal(false);
+        });
 </script>
 </body>
 </html>
