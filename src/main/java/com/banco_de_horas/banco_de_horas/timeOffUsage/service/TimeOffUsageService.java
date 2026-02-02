@@ -3,7 +3,6 @@ package com.banco_de_horas.banco_de_horas.timeOffUsage.service;
 import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
-import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffSummaryDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffUsageItemDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.TimeOffUsageRequestDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.entity.TimeOffUsageEntity;
@@ -160,37 +159,18 @@ public class TimeOffUsageService {
     }
 
     /**
-     * Conta quantas folgas e horas foram usadas no mês
+     * Horas usadas em folga
      */
-    public MonthlyTimeOffSummaryDTO getMonthlySummary(TaxEntity tax) {
-        YearMonth currentMonth = YearMonth.now();
-        LocalDate start = currentMonth.atDay(1);
-        LocalDate end = currentMonth.atEndOfMonth();
-
-        Long totalTimeOffs =
-            timeOffUsageRepository.countByTaxAndPeriod(tax, start, end);
-
-        BigDecimal totalHoursUsed =
-            timeOffUsageRepository.sumHoursUsedByTaxAndPeriod(tax, start, end);
-
-        return new MonthlyTimeOffSummaryDTO(
-            totalTimeOffs,
-            totalHoursUsed
-        );
+    public BigDecimal getHoursUsed(TaxEntity tax) {
+        return timeOffUsageRepository.sumAllHoursUsedByTax(tax);
     }
 
     /**
-     * busca folgas do mês de um usuário
+     * busca folgas do usuário por ordem de cadastro
      */
-    public List<MonthlyTimeOffUsageItemDTO> getMonthlyTimeUsage(TaxEntity tax) {
-        YearMonth month = YearMonth.now();
-        LocalDateTime start = month.atDay(1).atStartOfDay();
-        LocalDateTime end = month.atEndOfMonth().atTime(23, 59, 59);
-
+    public List<MonthlyTimeOffUsageItemDTO> getAllTimeUsage(TaxEntity tax) {
         return timeOffUsageRepository
-            .findByTaxEntityAndRegistrationDateBetweenOrderByRegistrationDateDesc(
-                tax, start, end
-            )
+            .findByTaxEntityOrderByRegistrationDateDesc(tax)
             .stream()
             .map(usage -> new MonthlyTimeOffUsageItemDTO(
                 usage.getId(),
