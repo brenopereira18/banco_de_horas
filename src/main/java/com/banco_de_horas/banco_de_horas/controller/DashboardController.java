@@ -5,6 +5,7 @@ import com.banco_de_horas.banco_de_horas.holiday.entity.HolidayEntity;
 import com.banco_de_horas.banco_de_horas.holiday.service.HolidayService;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxResponseDTO;
+import com.banco_de_horas.banco_de_horas.tax.dto.UpdateProfileRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.service.TaxService;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffUsageItemDTO;
@@ -17,6 +18,7 @@ import com.banco_de_horas.banco_de_horas.work.service.WorkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +44,11 @@ public class DashboardController {
 
     @Autowired
     private TimeOffUsageService timeOffUsageService;
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 
     @GetMapping("/administrador")
     public String showDashboard(Model model,  @RequestParam(defaultValue = "fiscais") String tab) {
@@ -96,6 +103,30 @@ public class DashboardController {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @PostMapping("/alterar-senha")
+    public String changePassword(
+        @ModelAttribute UpdateProfileRequestDTO dto,
+        Authentication authentication,
+        RedirectAttributes redirectAttributes) {
+
+        try {
+            TaxEntity user = (TaxEntity) authentication.getPrincipal();
+
+            taxService.updateProfile(
+                user.getId(),
+                dto
+            );
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                "Senha alterada com sucesso!");
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        TaxEntity user = (TaxEntity) authentication.getPrincipal();
+        return "redirect:/banco_de_horas/dashboard/fiscal/" + user.getId();
     }
 
     @PostMapping("/fiscal/{taxId}/editar/servico")
