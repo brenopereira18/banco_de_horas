@@ -54,14 +54,15 @@ public class DashboardController {
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/administrador")
-    public String showDashboard(Model model,  @RequestParam(defaultValue = "fiscais") String tab) {
+    public String showDashboard(Model model,  @RequestParam(defaultValue = "fiscais") String tab, Authentication authentication) {
         List<TaxResponseDTO> fiscais = taxService.getAllTax();
         List<HolidayEntity> feriados = holidayService.listAll();
+        TaxEntity user = (TaxEntity) authentication.getPrincipal();
 
         model.addAttribute("fiscais", fiscais);
         model.addAttribute("feriados", feriados);
         model.addAttribute("activeTab", tab);
-        model.addAttribute("userName", "Eduardo");
+        model.addAttribute("user", user);
         return "dashboardManager";
     }
 
@@ -77,7 +78,6 @@ public class DashboardController {
             boolean isAdmin = auth != null &&
                 auth.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"));
-
             model.addAttribute("isAdmin", isAdmin);
 
             // Paginação de serviços
@@ -243,7 +243,7 @@ public class DashboardController {
     }
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    @PostMapping("/criar/fiscal")
+    @PostMapping("/administrador/criar/fiscal")
     public String addFiscal(@ModelAttribute TaxRequestDTO taxRequestDTO,
                             RedirectAttributes redirectAttributes) {
         try {
@@ -258,7 +258,7 @@ public class DashboardController {
     }
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    @PostMapping("/criar/feriado")
+    @PostMapping("/administrador/criar/feriado")
     public String addHoliday(@ModelAttribute HolidayRequestDTO holidayRequestDTO,
                              RedirectAttributes redirectAttributes) {
         try {
