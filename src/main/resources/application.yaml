@@ -3,9 +3,9 @@ spring:
     name: banco_de_horas
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/annual_leave
-    username: postgres
-    password: 2001
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/annual_leave}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:2001}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
