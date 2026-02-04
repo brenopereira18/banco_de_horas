@@ -45,7 +45,7 @@ public class TaxService {
 
     @Transactional(readOnly = true)
     public List<TaxResponseDTO> getAllTax() {
-        return this.taxRepository.findAll()
+        return this.taxRepository.findAllByOrderByFullNameAsc()
             .stream()
             .map(tax -> {
                 return new TaxResponseDTO(
