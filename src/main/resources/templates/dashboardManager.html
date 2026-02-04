@@ -17,11 +17,13 @@
             <h1 class="text-2xl font-bold text-gray-900">Dashboard - Supervisor</h1>
             <p class="text-lg text-gray-600 mt-1">Bem-vindo, <span th:text="${userName}">Eduardo</span></p>
         </div>
-        <a href="/logout"
-           class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold transition-colors duration-200">
-            <img th:src="@{/images/arrow-right.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
-            <span>Sair</span>
-        </a>
+        <form th:action="@{/banco_de_horas/dashboard/logout}" method="post">
+            <button type="submit"
+                    class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold transition-colors duration-200">
+                <img th:src="@{/images/arrow-right.svg}" alt="Sair" class="h-4 w-4"/>
+                <span>Sair</span>
+            </button>
+        </form>
     </header>
 
     <!-- Navigation Tabs -->
@@ -84,10 +86,32 @@
                     </p>
                 </div>
 
-                <a th:href="@{/banco_de_horas/dashboard/fiscal/{id}(id=${fiscal.id()})}"
-                   class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200">
-                    Ver Detalhes
-                </a>
+                <div class="flex items-center gap-2">
+                    <!-- Input de horas -->
+                    <form th:action="@{/banco_de_horas/dashboard/administrador/fiscal/{id}/add-hours(id=${fiscal.id()})}"
+                          method="POST"
+                          class="flex items-center gap-1">
+
+                        <input type="number"
+                               step="0.5"
+                               min="0"
+                               name="hours"
+                               placeholder="+ horas"
+                               class="w-20 text-xs border rounded px-2 py-1"
+                               required>
+
+                        <button type="submit"
+                                class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200">
+                            +
+                        </button>
+                    </form>
+
+                    <!-- Ver detalhes -->
+                    <a th:href="@{/banco_de_horas/dashboard/fiscal/{id}(id=${fiscal.id()})}"
+                       class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">
+                        Ver Detalhes
+                    </a>
+                </div>
             </div>
         </div>
 

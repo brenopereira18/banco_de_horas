@@ -18,7 +18,9 @@ import com.banco_de_horas.banco_de_horas.work.service.WorkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +52,7 @@ public class DashboardController {
         return "login";
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/administrador")
     public String showDashboard(Model model,  @RequestParam(defaultValue = "fiscais") String tab) {
         List<TaxResponseDTO> fiscais = taxService.getAllTax();
@@ -67,6 +70,15 @@ public class DashboardController {
         try {
             TaxEntity tax = taxService.findById(id);
             BigDecimal generatedHours = workService.getNumberOfHoursGenerated(tax);
+
+            Authentication auth =
+                SecurityContextHolder.getContext().getAuthentication();
+
+            boolean isAdmin = auth != null &&
+                auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"));
+
+            model.addAttribute("isAdmin", isAdmin);
 
             // Paginação de serviços
             Page<MonthlyWorkItemDTO> worksPage = workService.getAllWorks(tax, page, 10);
@@ -129,6 +141,17 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/fiscal/" + user.getId();
     }
 
+    @PostMapping("/administrador/fiscal/{id}/add-hours")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String addHoursToFiscal(
+        @PathVariable Long id,
+        @RequestParam BigDecimal hours
+    ) {
+        taxService.addHours(id, hours);
+        return "redirect:/banco_de_horas/dashboard/administrador";
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/fiscal/{taxId}/editar/servico")
     public String editWork(
         @RequestParam Long workId,
@@ -148,6 +171,7 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/excluir/servico/{id}")
     public String deleteWork(@PathVariable Long id, RedirectAttributes redirectAttributes, @RequestParam Long taxId) {
         try {
@@ -161,6 +185,7 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/fiscal/{taxId}/timeoff")
     public String createTimeOff(@PathVariable Long taxId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate, @RequestParam(required = false) BigDecimal partialHours) {
         TimeOffUsageRequestDTO dto = new TimeOffUsageRequestDTO(taxId, startDate, endDate, partialHours);
@@ -169,6 +194,7 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/fiscal/{taxId}/editar/folga")
     public String editTimeOff(
         @PathVariable Long taxId,
@@ -183,6 +209,7 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/excluir/folga/{id}")
     public String deleteTimeOff(@PathVariable Long id, @RequestParam Long taxId, RedirectAttributes redirectAttributes) {
         try {
@@ -197,6 +224,7 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/fiscal/{id}/work")
     public String addService(@PathVariable("id") Long taxId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDateTime, @RequestParam String description, RedirectAttributes redirectAttributes) {
         try {
@@ -214,6 +242,7 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/criar/fiscal")
     public String addFiscal(@ModelAttribute TaxRequestDTO taxRequestDTO,
                             RedirectAttributes redirectAttributes) {
@@ -228,6 +257,7 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/administrador";
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/criar/feriado")
     public String addHoliday(@ModelAttribute HolidayRequestDTO holidayRequestDTO,
                              RedirectAttributes redirectAttributes) {
@@ -242,6 +272,7 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/administrador?tab=feriados";
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/editar/feriado")
     public String editHoliday(@ModelAttribute HolidayRequestDTO holidayRequestDTO,
                               @RequestParam Long id,
@@ -257,6 +288,7 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/administrador?tab=feriados";
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/excluir/feriado/{id}")
     public String deleteHoliday(@PathVariable Long id,
                                 RedirectAttributes redirectAttributes) {
