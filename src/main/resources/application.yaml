@@ -3,9 +3,9 @@ spring:
     name: banco_de_horas
 
   datasource:
-    url: jdbc:***REMOVED***ql://localhost:5432/***REMOVED***
-    username: ***REMOVED***
-    password: ***REMOVED***
+    url: ${DATABASE_URL:jdbc:***REMOVED***ql://localhost:5432/***REMOVED***}
+    username: ${DATABASE_USERNAME:***REMOVED***}
+    password: ${DATABASE_PASSWORD:***REMOVED***}
     driver-class-name: org.***REMOVED***ql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
