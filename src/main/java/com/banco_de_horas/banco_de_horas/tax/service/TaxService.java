@@ -91,6 +91,19 @@ public class TaxService {
         taxRepository.delete(existing);
     }
 
+    public void addHours(Long taxId, BigDecimal hours) {
+        if (hours == null || hours.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Horas inválidas");
+        }
+
+        TaxEntity tax = taxRepository.findById(taxId)
+            .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
+
+        tax.addHours(hours);
+        taxRepository.save(tax);
+    }
+
+
     public TaxEntity findById(Long id) {
         TaxEntity existingTax = taxRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
