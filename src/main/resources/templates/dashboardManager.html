@@ -89,8 +89,8 @@
 
     <!-- Main Content Area: Lista de Fiscais -->
     <main th:if="${activeTab == 'fiscais'}" class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
-            <div class="flex items-center gap-4 flex-1">
+        <div class="flex items-start justify-between sm:items-center mb-4 pb-4 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 flex-1">
                 <h2 class="text-xl font-semibold text-gray-800">Lista de Fiscais</h2>
 
                 <!-- Campo de Busca -->
@@ -98,8 +98,8 @@
                     <div class="relative">
                         <input type="text"
                                id="searchFiscal"
-                               placeholder="Buscar fiscal por nome..."
-                               class="w-48 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                               placeholder="Buscar por nome..."
+                               class="w-44 sm:w-48 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <img th:src="@{/images/search.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
                         </div>
@@ -107,19 +107,21 @@
                 </div>
             </div>
             <button onclick="toggleModal(true)"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                <img th:src="@{/images/user-plus.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
-                Adicionar Fiscal
+                    class="inline-flex items-center px-2 sm:px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                <img th:src="@{/images/user-plus.svg}" alt="Ícone" class="sm:mr-2 w-5 h-5 sm:h-4 sm:w-4"/>
+                <span class="hidden sm:inline">
+                    Adicionar Fiscal
+                </span>
             </button>
         </div>
 
         <div id="fiscalList" class="max-h-96 overflow-y-auto mr-1">
             <div th:each="fiscal : ${fiscais}"
-                 class="fiscal-item flex items-center justify-between p-2 border-b border-gray-150 last:border-b-0 hover:bg-gray-100 rounded-md transition-colors duration-150"
+                 class="fiscal-item flex items-center justify-between p-2 border-b border-gray-150 last:border-b-0 hover:bg-gray-100 rounded-md transition-colors duration-150 overflow-x-auto whitespace-nowrap sm:overflow-visible"
                  th:data-name="${fiscal.fullName()}">
 
                 <!-- Dados do Fiscal -->
-                <div class="flex-1">
+                <div class="flex-1 whitespace-nowrap">
                     <p class="font-semibold text-gray-700"
                        th:text="${fiscal.fullName()}">
                         Nome Completo do Fiscal
@@ -134,7 +136,7 @@
                     </p>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex pl-14 sm:pl-0 items-center gap-2">
                     <!-- Input de horas -->
                     <form th:action="@{/banco_de_horas/dashboard/administrador/fiscal/{id}/add-hours(id=${fiscal.id()})}"
                           method="POST"
@@ -179,7 +181,7 @@
             <h2 class="text-xl font-semibold text-gray-800">Lista de Feriados</h2>
             <button onclick="toggleHolidayModal(true)"
                     class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                <img th:src="@{/images/plus.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
+                <img th:src="@{/images/plus.svg}" alt="Ícone" class="sm:mr-2 h-4 w-4"/>
                 Adicionar Feriado
             </button>
         </div>
