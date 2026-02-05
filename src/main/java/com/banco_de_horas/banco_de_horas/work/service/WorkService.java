@@ -150,26 +150,21 @@ public class WorkService {
         DayOfWeek day = dateTime.getDayOfWeek();
         int hour = dateTime.getHour();
 
-        // Segunda madrugada
-        if (day == DayOfWeek.MONDAY && hour < 5) {
-            return BigDecimal.valueOf(2.5);
-        }
-
         // Domingo ou feriado
         if (day == DayOfWeek.SUNDAY || isHoliday) {
-            if (hour < 5) return BigDecimal.valueOf(1.87);
-            if (hour < 22) return BigDecimal.valueOf(2.0);
-            return BigDecimal.valueOf(2.5);
+            if (hour >= 5 && hour < 22) {
+                return BigDecimal.valueOf(2.0);      // 05h às 22h: +100%
+            } else {
+                return BigDecimal.valueOf(2.5);      // 22h às 00h e 00h às 05h: +150%
+            }
         }
 
         // Segunda a sábado
-        if (hour < 5) {
-            return BigDecimal.valueOf(1.5); // regra padrão (se existir)
+        if (hour >= 5 && hour < 22) {
+            return BigDecimal.valueOf(1.5);          // 05h às 22h: +50%
+        } else {
+            return BigDecimal.valueOf(1.87);         // 22h às 00h e 00h às 05h: +87%
         }
-        if (hour < 22) {
-            return BigDecimal.valueOf(1.5);
-        }
-        return BigDecimal.valueOf(1.87);
     }
 
     private String formatDetail(

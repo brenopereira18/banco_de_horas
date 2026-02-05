@@ -12,8 +12,10 @@
     <!-- Header Section -->
     <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard - <span
-                    th:text="${fiscal.getUserType().getUserType()}"></span></h1>
+            <h1 class="text-2xl flex gap-2 font-bold text-gray-900">Dashboard -
+                <span th:text="${fiscal.getUserType().getUserType()}"></span>
+                <span th:text="${fiscal.getRegistration()}"></span>
+            </h1>
             <p class="text-lg text-gray-600 mt-1">
                 Bem-vindo, <span th:text="${fiscal.fullName}">Breno Pereira Betti</span>
             </p>
@@ -616,7 +618,7 @@
             document.getElementById('startDateTime').value = currentDateTime;
 
             // Foca no primeiro campo
-            document.getElementById('startDateTime').focus();
+            document.getElementById('description').focus();
         } else {
             modal.classList.add('hidden');
             body.classList.remove('overflow-hidden');
