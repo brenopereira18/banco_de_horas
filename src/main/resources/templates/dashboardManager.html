@@ -274,7 +274,7 @@
                 <label for="registration" class="block text-gray-700 text-sm font-bold mb-2">Matrícula:</label>
                 <input type="text" id="registration" name="registration" placeholder="Digite a matrícula"
                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                       required>
+                       required oninput="formatRegistration(this)">
             </div>
 
             <div class="mb-6">
@@ -547,6 +547,23 @@
 
     function closePasswordModal() {
         document.getElementById('passwordModal').classList.add('hidden');
+    }
+
+    function formatRegistration(input) {
+        // Remove tudo que não é número
+        let value = input.value.replace(/\D/g, '');
+
+        // Limita a 6 dígitos
+        if (value.length > 6) {
+            value = value.substring(0, 6);
+        }
+
+        // Adiciona o hífen após o 5º dígito
+        if (value.length > 5) {
+            value = value.substring(0, 5) + '-' + value.substring(5);
+        }
+
+        input.value = value;
     }
 </script>
 
