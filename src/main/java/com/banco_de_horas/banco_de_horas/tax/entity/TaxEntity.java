@@ -37,7 +37,7 @@ public class TaxEntity implements UserDetails {
 
     @Column(name = "matricula", nullable = false, unique = true)
     @NotBlank(message = "Matrícula é obrigatória")
-    @Pattern(regexp = "\\d{5}-\\d", message = "A matrícula deve estar no formato 00000-0")
+    // @Pattern(regexp = "\\d{5}-\\d", message = "A matrícula deve estar no formato 00000-0")
     private String registration;
 
     @Column(name = "senha", nullable = false)
