@@ -12,11 +12,11 @@ public record WorkRequestDTO(
     String description,
 
     @NotNull
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     LocalDateTime startDateTime,
 
     @NotNull
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     LocalDateTime endDateTime
 ) {
 }
