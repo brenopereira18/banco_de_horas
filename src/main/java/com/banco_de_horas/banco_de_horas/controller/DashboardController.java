@@ -25,6 +25,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -239,6 +241,25 @@ public class DashboardController {
                 "Erro ao cadastrar serviço: " + e.getMessage());
         }
 
+        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
+    }
+
+    @PostMapping("/fiscal/{id}/work/batch")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String createBatchWork(
+        @PathVariable("id") Long taxId,
+        @RequestParam("servicesJson") String servicesJson
+    ) throws Exception {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        List<WorkRequestDTO> services =
+            mapper.readValue(
+                servicesJson,
+                new TypeReference<List<WorkRequestDTO>>() {}
+            );
+
+        workService.createBatch(taxId, services);
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
     }
 
