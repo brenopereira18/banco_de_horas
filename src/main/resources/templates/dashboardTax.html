@@ -482,54 +482,72 @@
         </div>
     </div>
 
-    <!-- Cadastro de serviço -->
-    <div id="addServiceModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
+    <!-- MODAL: Cadastro de múltiplos serviços -->
+    <div id="addServiceModal"
+         class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
+
         <div class="flex items-center justify-center min-h-full p-4">
             <div class="bg-white rounded-lg p-6 w-full max-w-md">
-                <h3 class="text-xl font-bold mb-4">Adicionar Serviço</h3>
 
-                <form id="addServiceForm" th:action="@{/banco_de_horas/dashboard/fiscal/{id}/work(id=${fiscal.id})}"
-                      method="POST">
-                    <div class="mb-4">
-                        <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Descrição do
-                            Serviço:</label>
-                        <input type="text"
-                               id="description"
-                               name="description"
-                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                    </div>
-                    <div class="mb-4">
-                        <label for="startDateTime" class="block text-gray-700 text-sm font-bold mb-2">Início do
-                            Serviço:</label>
-                        <input type="datetime-local"
-                               id="startDateTime"
-                               name="startDateTime"
-                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                               required>
-                    </div>
+                <h3 class="text-xl font-bold mb-4">Adicionar Serviços</h3>
 
-                    <div class="mb-6">
-                        <label for="endDateTime" class="block text-gray-700 text-sm font-bold mb-2">Fim do
-                            Serviço:</label>
-                        <input type="datetime-local"
-                               id="endDateTime"
-                               name="endDateTime"
-                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                               required>
-                    </div>
+                <!-- CAMPOS -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Descrição do Serviço
+                    </label>
+                    <input type="text" id="description"
+                           class="shadow border rounded w-full py-2 px-3">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Início do Serviço
+                    </label>
+                    <input type="datetime-local" id="startDateTime"
+                           class="shadow border rounded w-full py-2 px-3">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Fim do Serviço
+                    </label>
+                    <input type="datetime-local" id="endDateTime"
+                           class="shadow border rounded w-full py-2 px-3">
+                </div>
+
+                <!-- BOTÃO ADICIONAR -->
+                <button type="button"
+                        onclick="addService()"
+                        class="w-full mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    + Adicionar serviço à lista
+                </button>
+
+                <!-- LISTA DE SERVIÇOS -->
+                <ul id="serviceList"
+                    class="space-y-2 mb-4 text-sm max-h-[120px] overflow-y-auto"></ul>
+
+                <!-- FORM FINAL -->
+                <form th:action="@{/banco_de_horas/dashboard/fiscal/{id}/work/batch(id=${fiscal.id})}"
+                      method="POST"
+                      onsubmit="prepareSubmit(event)">
+
+                    <input type="hidden" name="servicesJson" id="servicesJson">
 
                     <div class="flex justify-end space-x-2">
                         <button type="button"
                                 onclick="toggleServiceModal(false)"
-                                class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded">
                             Cancelar
                         </button>
+
                         <button type="submit"
-                                class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors duration-200">
-                            Cadastrar Serviço
+                                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Cadastrar todos
                         </button>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
@@ -597,7 +615,12 @@
 </div>
 
 <script>
-    // Função para modal de serviços
+    // Lista de serviços em memória
+    const services = [];
+
+    // =========================
+    // MODAL
+    // =========================
     function toggleServiceModal(show) {
         const modal = document.getElementById('addServiceModal');
         const body = document.body;
@@ -606,50 +629,47 @@
             modal.classList.remove('hidden');
             body.classList.add('overflow-hidden');
 
-            // Pré-preencher com data/hora atual
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-
-            const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-            document.getElementById('startDateTime').value = currentDateTime;
-
-            // Foca no primeiro campo
             document.getElementById('description').focus();
         } else {
             modal.classList.add('hidden');
             body.classList.remove('overflow-hidden');
-            document.getElementById('addServiceForm').reset();
+
+            // Limpa tudo ao fechar
+            services.length = 0;
+            renderServices();
+            document.getElementById('description').value = '';
+            document.getElementById('startDateTime').value = '';
+            document.getElementById('endDateTime').value = '';
         }
     }
 
-    // Event listener para fechar modal de serviços ao clicar fora
+    // Fechar ao clicar fora
     document.getElementById('addServiceModal').addEventListener('click', function (event) {
         if (event.target === this) {
             toggleServiceModal(false);
         }
     });
 
-    // Atualizar o event listener de ESC para incluir o modal de serviços
+    // Fechar com ESC
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
-            // Fechar todos os modais
             toggleServiceModal(false);
-            // ... outros modais que você já tem
         }
     });
 
-    // Validação do formulário de serviços
-    document.getElementById('addServiceForm').addEventListener('submit', function (event) {
+    // =========================
+    // ADICIONAR SERVIÇO À LISTA
+    // =========================
+    function addService() {
         const startDateTime = document.getElementById('startDateTime').value;
         const endDateTime = document.getElementById('endDateTime').value;
 
+        // descrição é GLOBAL
+        const description = document.getElementById('description').value.trim();
+
+        // valida SOMENTE datas
         if (!startDateTime || !endDateTime) {
-            event.preventDefault();
-            alert('Por favor, preencha ambas as datas e horários.');
+            alert('Informe data/hora de início e fim.');
             return;
         }
 
@@ -657,21 +677,68 @@
         const end = new Date(endDateTime);
 
         if (start >= end) {
-            event.preventDefault();
-            alert('A data/hora de início deve ser anterior à data/hora de fim.');
+            alert('A data/hora de início deve ser anterior à de fim.');
             return;
         }
 
-        // Validar se não é no futuro muito distante (opcional)
-        const now = new Date();
-        if (start > now) {
-            const confirm = window.confirm('A data de início é no futuro. Deseja continuar?');
-            if (!confirm) {
-                event.preventDefault();
-                return;
-            }
+        services.push({
+            description: description,
+            startDateTime,
+            endDateTime
+        });
+
+        renderServices();
+
+        // NÃO limpa a descrição
+        document.getElementById('startDateTime').value = '';
+        document.getElementById('endDateTime').value = '';
+        document.getElementById('startDateTime').focus();
+    }
+
+    // =========================
+    // RENDERIZA LISTA
+    // =========================
+    function renderServices() {
+        const list = document.getElementById('serviceList');
+        list.innerHTML = '';
+
+        services.forEach((service, index) => {
+            list.innerHTML += `
+            <li class="flex justify-between items-center bg-gray-100 p-2 rounded">
+                <div>
+                    ${service.description ? `<div class="text-sm font-semibold">${service.description}</div>` : ''}
+                    <span class="text-xs text-gray-600">
+                        ${service.startDateTime} → ${service.endDateTime}
+                    </span>
+                </div>
+                <button type="button"
+                    onclick="removeService(${index})"
+                    class="text-red-600 text-xs hover:underline">
+                    Remover
+                </button>
+            </li>
+            `;
+        });
+    }
+
+    function removeService(index) {
+        services.splice(index, 1);
+        renderServices();
+    }
+
+    // =========================
+    // SUBMIT FINAL (BATCH)
+    // =========================
+    function prepareSubmit(event) {
+        if (services.length === 0) {
+            alert('Adicione pelo menos um período.');
+            event.preventDefault();
+            return;
         }
-    });
+
+        // Apenas envia o JSON com todos os serviços (já incluindo description)
+        document.getElementById('servicesJson').value = JSON.stringify(services);
+    }
 
     function openEditModal(button) {
         document.getElementById('editWorkId').value =
