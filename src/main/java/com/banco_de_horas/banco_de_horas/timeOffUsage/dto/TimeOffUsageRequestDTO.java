@@ -12,6 +12,10 @@ public record TimeOffUsageRequestDTO(
 
     @NotNull
     @JsonFormat(pattern = "dd/MM/yyyy")
+    LocalDate solicitationDate,
+
+    @NotNull
+    @JsonFormat(pattern = "dd/MM/yyyy")
     LocalDate startDate,
 
     @JsonFormat(pattern = "dd/MM/yyyy")

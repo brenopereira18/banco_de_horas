@@ -257,6 +257,8 @@
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
 
+                            <p class="text-sm text-gray-500">Solicitação: <span th:text="${#temporals.format(item.solicitationDate, 'dd/MM/yyyy')}"></span></p>
+
                             <!-- Datas -->
                             <p class="text-sm text-gray-500"
                                th:with="hasEnd=${item.endDate != null}, end=${hasEnd ? item.endDate : item.startDate}, onlyHours=${item.endDate == null && item.fractionalHours != null},
@@ -295,6 +297,7 @@
                             <button class="p-1 text-gray-400 hover:text-yellow-600"
                                     title="Editar"
                                     th:data-id="${item.id}"
+                                    th:data-solicitation="${#temporals.format(item.solicitationDate, 'yyyy-MM-dd')}"
                                     th:data-start="${#temporals.format(item.startDate, 'yyyy-MM-dd')}"
                                     th:data-end="${item.endDate != null ? #temporals.format(item.endDate, 'yyyy-MM-dd') : ''}"
                                     th:data-partial="${item.fractionalHours}"
@@ -355,7 +358,15 @@
                 <h3 class="text-xl font-bold mb-4">Usar Folga</h3>
 
                 <form th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/timeoff(taxId=${fiscal.id})}"
-                      method="POST">
+                      method="POST" class="max-h-[480px] overflow-y-auto pr-2">
+
+                    <div class="mb-4">
+                        <label class="block mb-2">Data de Solicitação:</label>
+                        <input type="date"
+                               name="solicitationDate"
+                               class="w-full border p-2 rounded"
+                               required>
+                    </div>
 
                     <div class="mb-4">
                         <label class="block mb-2">Data início:</label>
@@ -421,8 +432,17 @@
 
                 <form id="editTimeOffForm"
                       th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/editar/folga(taxId=${fiscal.id})}"
-                      method="POST">
+                      method="POST" class="max-h-[480px] overflow-y-auto pr-2">
                     <input type="hidden" id="editTimeOffId" name="timeOffId"/>
+
+                    <div class="mb-4">
+                        <label for="editSolicitationDate" class="block mb-2">Data de Solicitação:</label>
+                        <input type="date"
+                               id="editSolicitationDate"
+                               name="solicitationDate"
+                               class="w-full border p-2 rounded"
+                               required>
+                    </div>
 
                     <div class="mb-4">
                         <label for="editStartDate" class="block mb-2">Data início:</label>
@@ -784,11 +804,13 @@
 
     function openEditTimeOffModal(button) {
         const id = button.getAttribute('data-id');
+        const solicitationDate = button.getAttribute('data-solicitation')
         const startDate = button.getAttribute('data-start');
         const endDate = button.getAttribute('data-end');
         const partialHours = button.getAttribute('data-partial');
 
         document.getElementById('editTimeOffId').value = id;
+        document.getElementById('editSolicitationDate').value = solicitationDate;
         document.getElementById('editStartDate').value = startDate;
         document.getElementById('editEndDate').value = endDate || '';
         document.getElementById('editPartialHours').value = partialHours || '';
