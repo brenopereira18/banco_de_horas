@@ -750,12 +750,24 @@ html {
   max-height: 24rem;
 }
 
-.max-h-\[200px\] {
-  max-height: 200px;
-}
-
 .max-h-\[120px\] {
   max-height: 120px;
+}
+
+.max-h-\[320px\] {
+  max-height: 320px;
+}
+
+.max-h-\[5000px\] {
+  max-height: 5000px;
+}
+
+.max-h-\[500px\] {
+  max-height: 500px;
+}
+
+.max-h-\[480px\] {
+  max-height: 480px;
 }
 
 .min-h-full {
@@ -1217,6 +1229,10 @@ html {
 
 .pt-4 {
   padding-top: 1rem;
+}
+
+.pr-2 {
+  padding-right: 0.5rem;
 }
 
 .text-center {
