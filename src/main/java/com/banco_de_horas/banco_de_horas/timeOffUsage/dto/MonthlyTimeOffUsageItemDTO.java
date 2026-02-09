@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 public record MonthlyTimeOffUsageItemDTO(
     Long id,
+    LocalDate solicitationDate,
     LocalDate startDate,
     LocalDate endDate,
     BigDecimal hoursUsed,

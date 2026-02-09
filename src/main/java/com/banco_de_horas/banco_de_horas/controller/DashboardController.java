@@ -189,8 +189,8 @@ public class DashboardController {
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/fiscal/{taxId}/timeoff")
-    public String createTimeOff(@PathVariable Long taxId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate, @RequestParam(required = false) BigDecimal partialHours) {
-        TimeOffUsageRequestDTO dto = new TimeOffUsageRequestDTO(taxId, startDate, endDate, partialHours);
+    public String createTimeOff(@PathVariable Long taxId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate solicitationDate, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate, @RequestParam(required = false) BigDecimal partialHours) {
+        TimeOffUsageRequestDTO dto = new TimeOffUsageRequestDTO(taxId, solicitationDate, startDate, endDate, partialHours);
         timeOffUsageService.create(dto);
 
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
@@ -201,11 +201,12 @@ public class DashboardController {
     public String editTimeOff(
         @PathVariable Long taxId,
         @RequestParam Long timeOffId,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate solicitationDate,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
         @RequestParam(required = false) BigDecimal partialHours) {
 
-        TimeOffUsageRequestDTO dto = new TimeOffUsageRequestDTO(taxId, startDate, endDate, partialHours);
+        TimeOffUsageRequestDTO dto = new TimeOffUsageRequestDTO(taxId, solicitationDate, startDate, endDate, partialHours);
         timeOffUsageService.update(timeOffId, dto);
 
         return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
