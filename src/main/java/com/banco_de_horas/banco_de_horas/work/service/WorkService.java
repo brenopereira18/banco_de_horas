@@ -55,6 +55,23 @@ public class WorkService {
         return mapToResponse(saved);
     }
 
+    @Transactional
+    public void createBatch(Long taxId, List<WorkRequestDTO> services) {
+
+        for (WorkRequestDTO dto : services) {
+
+            // garante que o taxId venha do path e não do frontend
+            WorkRequestDTO normalized = new WorkRequestDTO(
+                taxId,
+                dto.description(),
+                dto.startDateTime(),
+                dto.endDateTime()
+            );
+
+            create(normalized);
+        }
+    }
+
     private WorkResponseDTO mapToResponse(WorkEntity work) {
         return new WorkResponseDTO(
             work.getId(),
