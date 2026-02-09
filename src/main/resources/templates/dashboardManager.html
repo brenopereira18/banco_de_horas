@@ -506,13 +506,6 @@
             alert('Nome completo deve ter pelo menos 2 caracteres.');
             return;
         }
-
-        const registrationRegex = /^[a-zA-Z0-9]+$/;
-        if (!registrationRegex.test(registration)) {
-            event.preventDefault();
-            alert('Matrícula deve conter apenas letras e números.');
-            return;
-        }
     });
 
     // ADICIONAR: Validação do formulário de feriados
