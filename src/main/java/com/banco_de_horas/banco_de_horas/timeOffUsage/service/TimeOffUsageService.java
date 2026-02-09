@@ -48,6 +48,7 @@ public class TimeOffUsageService {
 
         TimeOffUsageEntity usage = TimeOffUsageEntity.builder()
             .taxEntity(tax)
+            .solicitationDate(dto.solicitationDate())
             .startDate(dto.startDate())
             .endDate(dto.endDate())
             .fractionalHours(dto.fractionalHours())
@@ -68,6 +69,7 @@ public class TimeOffUsageService {
 
         restoreTaxBalance(existing);
 
+        existing.setSolicitationDate(dto.solicitationDate());
         existing.setStartDate(dto.startDate());
         existing.setEndDate(dto.endDate());
         existing.setFractionalHours(dto.fractionalHours());
@@ -178,6 +180,7 @@ public class TimeOffUsageService {
             .findByTaxEntityOrderByRegistrationDateDesc(tax, pageable)
             .map(usage -> new MonthlyTimeOffUsageItemDTO(
                 usage.getId(),
+                usage.getSolicitationDate(),
                 usage.getStartDate(),
                 usage.getEndDate(),
                 usage.getHoursUsed(),

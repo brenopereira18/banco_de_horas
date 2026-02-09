@@ -33,6 +33,10 @@ public class TimeOffUsageEntity {
     @NotNull(message = "Fiscal é obrigatório")
     private TaxEntity taxEntity;
 
+    @Column(name = "data_solicitacao", nullable = false)
+    @NotNull(message = "Data de solicitação é obrigatória")
+    private LocalDate solicitationDate;
+
     @Column(name = "data_inicio_folga", nullable = false)
     @NotNull(message = "Data de início da folga é obrigatória")
     private LocalDate startDate;
