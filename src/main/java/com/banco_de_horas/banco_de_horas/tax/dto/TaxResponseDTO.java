@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public record TaxResponseDTO(
     Long id,
     String fullName,
-    String balanceOfHours
+    String balanceOfHours,
+    BigDecimal lastAddedHours
 ) {
 }

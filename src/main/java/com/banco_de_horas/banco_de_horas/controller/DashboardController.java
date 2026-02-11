@@ -153,6 +153,13 @@ public class DashboardController {
         return "redirect:/banco_de_horas/dashboard/administrador";
     }
 
+    @PostMapping("/administrador/fiscal/{id}/revert-hours")
+    public String revertHours(@PathVariable Long id) {
+        taxService.revertLastAddedHours(id);
+        return "redirect:/banco_de_horas/dashboard/administrador";
+    }
+
+
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/fiscal/{taxId}/editar/servico")
     public String editWork(
