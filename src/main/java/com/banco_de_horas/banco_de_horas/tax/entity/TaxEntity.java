@@ -49,6 +49,9 @@ public class TaxEntity implements UserDetails {
     @DecimalMin(value = "0.00", message = "Saldo não pode ser negativo")
     private BigDecimal balanceOfHours = BigDecimal.ZERO;
 
+    @Column(name = "ultima_adicao_horas", precision = 10, scale = 2)
+    private BigDecimal lastAddedHours;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_usuario", nullable = false, length = 20)
     private UserType userType;
