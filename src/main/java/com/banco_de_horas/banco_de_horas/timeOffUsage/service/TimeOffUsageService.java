@@ -1,6 +1,7 @@
 package com.banco_de_horas.banco_de_horas.timeOffUsage.service;
 
 import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
+import com.banco_de_horas.banco_de_horas.holiday.repository.HolidayRepository;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffUsageItemDTO;
@@ -16,11 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 @Service
 @Transactional
@@ -31,6 +29,9 @@ public class TimeOffUsageService {
 
     @Autowired
     private TaxRepository taxRepository;
+
+    @Autowired
+    private HolidayRepository holidayRepository;
 
     /**
      * Cria folga
@@ -98,17 +99,19 @@ public class TimeOffUsageService {
         BigDecimal total = BigDecimal.ZERO;
         BigDecimal hoursPerDay = getDailyLimit(tax);
 
-        // dias
-        if (end != null) {
-            if (end.isBefore(start)) {
-                throw new IllegalArgumentException("Data final inválida");
+        LocalDate finalDate = (end != null) ? end : start;
+
+        if (finalDate.isBefore(start)) {
+            throw new IllegalArgumentException("Data final inválida");
+        }
+        LocalDate current = start;
+
+        while (!current.isAfter(finalDate)) {
+            if (isBusinessDay(current)) {
+                total = total.add(hoursPerDay);
             }
 
-            long days = ChronoUnit.DAYS.between(start, end) + 1;
-
-            total = total.add(
-                hoursPerDay.multiply(BigDecimal.valueOf(days))
-            );
+            current = current.plusDays(1);
         }
 
         // horas extras
@@ -118,6 +121,22 @@ public class TimeOffUsageService {
 
         return total;
     }
+
+    /**
+     * Verifica dia da semana
+     */
+    private boolean isBusinessDay(LocalDate date) {
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+
+        // fim de semana
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            return false;
+        }
+
+        // feriado
+        return !holidayRepository.existsByDate(date);
+    }
+
 
     /**
      * limite de horas por dia
