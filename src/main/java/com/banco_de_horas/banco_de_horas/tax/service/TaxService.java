@@ -51,7 +51,8 @@ public class TaxService {
                 return new TaxResponseDTO(
                     tax.getId(),
                     tax.getFullName(),
-                    TimeFormatUtils.formatHours(tax.getBalanceOfHours())
+                    TimeFormatUtils.formatHours(tax.getBalanceOfHours()),
+                    tax.getLastAddedHours()
                 );
             }).toList();
     }
@@ -100,9 +101,26 @@ public class TaxService {
             .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
 
         tax.addHours(hours);
+        tax.setLastAddedHours(hours);
         taxRepository.save(tax);
     }
 
+    @Transactional
+    public void revertLastAddedHours(Long taxId) {
+
+        TaxEntity tax = taxRepository.findById(taxId)
+            .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
+
+        BigDecimal lastAdded = tax.getLastAddedHours();
+
+        if (lastAdded == null || lastAdded.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalStateException("Não há horas para reverter");
+        }
+        tax.subtractHours(lastAdded);
+        tax.setLastAddedHours(null);
+
+        taxRepository.save(tax);
+    }
 
     public TaxEntity findById(Long id) {
         TaxEntity existingTax = taxRepository.findById(id)
