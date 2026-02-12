@@ -261,28 +261,24 @@
 
                             <!-- Datas -->
                             <p class="text-sm text-gray-500"
-                               th:with="hasEnd=${item.endDate != null}, end=${hasEnd ? item.endDate : item.startDate}, onlyHours=${item.endDate == null && item.fractionalHours != null},
-                                days=${hasEnd ? T(java.time.temporal.ChronoUnit).DAYS.between(item.startDate, end) + 1 : 0}">
+                               th:with="hasEnd=${item.endDate != null},
+            end=${hasEnd ? item.endDate : item.startDate},
+            onlyHours=${item.endDate == null && item.fractionalHours != null}">
 
                                 <!-- Datas -->
                                 <span th:if="${item.startDate.equals(end)}"
                                       th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')}">
-                                </span>
+    </span>
 
                                 <span th:if="${!item.startDate.equals(end)}"
                                       th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')
-                                        + ' até ' + #temporals.format(end, 'dd/MM/yyyy')}">
-                                </span>
+            + ' até ' + #temporals.format(end, 'dd/MM/yyyy')}">
+    </span>
 
-                                <!-- Dias (só mostra se NÃO for apenas horas) -->
-                                <span th:if="${days > 0 && !onlyHours}">
-                                    • <span th:text="${days == 1 ? '1 dia' : days + ' dias'}"></span>
-                                </span>
-
-                                <!-- Horas -->
-                                <span th:if="${item.fractionalHours != null}">
-                                    • <span th:text="${item.fractionalHours} + 'h'"></span>
-                                </span>
+                                <!-- Dias úteis (só mostra se NÃO for apenas horas) -->
+                                <span th:if="${item.businessDays > 0 && !onlyHours}">
+        • <span th:text="${item.businessDays == 1 ? '1 dia útil' : item.businessDays + ' dias úteis'}"></span>
+    </span>
                             </p>
 
                             <div class="flex items-center space-x-4">
@@ -701,6 +697,16 @@
             return;
         }
 
+        if (start > now) {
+            alert('A data de início não pode ser no futuro.');
+            return;
+        }
+
+        if (end > now) {
+            alert('A data de fim não pode ser no futuro.');
+            return;
+        }
+
         services.push({
             description: description,
             startDateTime,
@@ -759,6 +765,30 @@
         // Apenas envia o JSON com todos os serviços (já incluindo description)
         document.getElementById('servicesJson').value = JSON.stringify(services);
     }
+
+    document.getElementById('editServiceForm').addEventListener('submit', function(e) {
+        const now = new Date();
+        const start = new Date(document.getElementById('editStartDateTime').value);
+        const end = new Date(document.getElementById('editEndDateTime').value);
+
+        if (start > now) {
+            e.preventDefault();
+            alert('A data de início não pode ser no futuro.');
+            return;
+        }
+
+        if (end > now) {
+            e.preventDefault();
+            alert('A data de fim não pode ser no futuro.');
+            return;
+        }
+
+        if (end <= start) {
+            e.preventDefault();
+            alert('A data de fim deve ser após o início.');
+            return;
+        }
+    });
 
     function openEditModal(button) {
         document.getElementById('editWorkId').value =
