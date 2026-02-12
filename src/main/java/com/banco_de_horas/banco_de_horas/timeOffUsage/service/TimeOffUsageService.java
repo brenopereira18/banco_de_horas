@@ -137,6 +137,25 @@ public class TimeOffUsageService {
         return !holidayRepository.existsByDate(date);
     }
 
+    /**
+     * conta quantos dias úteis foram de folga
+     */
+    private long calculateBusinessDays(LocalDate start, LocalDate end) {
+        if (start == null) return 0;
+
+        LocalDate finalDate = (end != null) ? end : start;
+        long count = 0;
+        LocalDate current = start;
+
+        while (!current.isAfter(finalDate)) {
+            if (isBusinessDay(current)) {
+                count++;
+            }
+            current = current.plusDays(1);
+        }
+
+        return count;
+    }
 
     /**
      * limite de horas por dia
@@ -204,7 +223,8 @@ public class TimeOffUsageService {
                 usage.getEndDate(),
                 usage.getHoursUsed(),
                 usage.getFractionalHours(),
-                TimeFormatUtils.formatHours(usage.getHoursUsed())
+                TimeFormatUtils.formatHours(usage.getHoursUsed()),
+                calculateBusinessDays(usage.getStartDate(), usage.getEndDate())
             ));
     }
 

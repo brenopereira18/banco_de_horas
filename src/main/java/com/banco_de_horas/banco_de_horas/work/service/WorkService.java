@@ -37,9 +37,16 @@ public class WorkService {
     private HolidayRepository holidayRepository;
 
     public WorkResponseDTO create(WorkRequestDTO dto) {
-
         TaxEntity fiscal = taxRepository.findById(dto.taxId())
             .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
+
+        LocalDateTime now = LocalDateTime.now();
+        if (dto.startDateTime().isAfter(now)) {
+            throw new IllegalArgumentException("Data de início não pode ser no futuro");
+        }
+        if (dto.endDateTime().isAfter(now)) {
+            throw new IllegalArgumentException("Data de fim não pode ser no futuro");
+        }
 
         WorkEntity work = WorkEntity.builder()
             .taxEntity(fiscal)
@@ -90,6 +97,14 @@ public class WorkService {
     public WorkEntity update(Long id, WorkRequestDTO updated) {
         WorkEntity existing = workRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Serviço não encontrado"));
+
+        LocalDateTime now = LocalDateTime.now();
+        if (updated.startDateTime().isAfter(now)) {
+            throw new IllegalArgumentException("Data de início não pode ser no futuro");
+        }
+        if (updated.endDateTime().isAfter(now)) {
+            throw new IllegalArgumentException("Data de fim não pode ser no futuro");
+        }
 
         TaxEntity tax = existing.getTaxEntity();
         tax.subtractHours(existing.getGeneratedTimeOff());
