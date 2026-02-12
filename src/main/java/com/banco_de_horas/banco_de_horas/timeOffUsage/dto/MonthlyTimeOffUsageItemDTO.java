@@ -10,6 +10,7 @@ public record MonthlyTimeOffUsageItemDTO(
     LocalDate endDate,
     BigDecimal hoursUsed,
     BigDecimal fractionalHours,
-    String formattedHours
+    String formattedHours,
+    long businessDays
 ) {
 }
