@@ -97,24 +97,29 @@ public class TimeOffUsageService {
         }
 
         BigDecimal total = BigDecimal.ZERO;
-        BigDecimal hoursPerDay = getDailyLimit(tax);
 
+        // Se só tem horas fracionadas (sem período de dias), retorna só elas
+        if (end == null && fractional != null && fractional.compareTo(BigDecimal.ZERO) > 0) {
+            return fractional;
+        }
+
+        BigDecimal hoursPerDay = getDailyLimit(tax);
         LocalDate finalDate = (end != null) ? end : start;
 
         if (finalDate.isBefore(start)) {
             throw new IllegalArgumentException("Data final inválida");
         }
+
         LocalDate current = start;
 
         while (!current.isAfter(finalDate)) {
             if (isBusinessDay(current)) {
                 total = total.add(hoursPerDay);
             }
-
             current = current.plusDays(1);
         }
 
-        // horas extras
+        // horas extras (só soma se tiver período de dias também)
         if (fractional != null && fractional.compareTo(BigDecimal.ZERO) > 0) {
             total = total.add(fractional);
         }
