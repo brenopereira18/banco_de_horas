@@ -7,12 +7,21 @@ services:
         ports:
             - 5432:5432
 
-        environment:
-            - POSTGRES_USER=***REMOVED***
-            - POSTGRES_PASSWORD=***REMOVED***
-            - POSTGRES_DB=***REMOVED***
+        env_file:
+            - .env
         volumes:
             - ***REMOVED***_data:/var/lib/***REMOVED***ql/data
+
+    app:
+        container_name: banco_horas_app
+        build: .
+        ports:
+            - 8080:8080
+        env_file:
+            - .env
+        depends_on:
+            - ***REMOVED***
+        restart: always
 
 volumes:
     ***REMOVED***_data:
