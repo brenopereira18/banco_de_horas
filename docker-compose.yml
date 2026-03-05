@@ -3,7 +3,7 @@ version: '3.8'
 services:
     ***REMOVED***:
         container_name: ***REMOVED***_***REMOVED***
-        image: ***REMOVED***
+        image: ***REMOVED***:16
         ports:
             - 5432:5432
 
