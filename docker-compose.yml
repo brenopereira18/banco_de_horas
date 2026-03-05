@@ -7,12 +7,21 @@ services:
         ports:
             - 5432:5432
 
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=2001
-            - POSTGRES_DB=annual_leave
+        env_file:
+            - .env
         volumes:
             - postgres_data:/var/lib/postgresql/data
+
+    app:
+        container_name: banco_horas_app
+        build: .
+        ports:
+            - 8080:8080
+        env_file:
+            - .env
+        depends_on:
+            - postgres
+        restart: always
 
 volumes:
     postgres_data:
