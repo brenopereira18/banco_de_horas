@@ -3,7 +3,7 @@ version: '3.8'
 services:
     postgres:
         container_name: annual_leave_postgres
-        image: postgres
+        image: postgres:16
         ports:
             - 5432:5432
 
