@@ -1,0 +1,56 @@
+name: Banco de Horas - Deploy
+
+on:
+    push:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup Java
+              uses: actions/setup-java@v3
+              with:
+                  distribution: temurin
+                  java-version: 21
+
+            - name: Build project
+              run: mvn clean install -DskipTests
+
+            - name: Login Docker Hub
+              run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+            - name: Build docker image
+              run: docker build -t ${{ secrets.DOCKER_USERNAME }}/banco_de_horas .
+
+            - name: Publish image
+              run: docker push ${{ secrets.DOCKER_USERNAME }}/banco_de_horas
+
+    deploy:
+        needs: build
+        runs-on: self-hosted
+        steps:
+            - name: Pull image Docker Hub
+              run: docker pull ${{ secrets.DOCKER_USERNAME }}/banco_de_horas:latest
+
+            - name: Remove container antigo
+              run: docker rm -f banco_horas_app || true
+
+            - name: Subir novo container
+              run: |
+                  docker run -d \
+                    -p 8080:8080 \
+                    --name banco_horas_app \
+                    --network banco_de_horas_default \
+                    -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+                    -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+                    -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+                    -e DB_HOST=${{ secrets.DB_HOST }} \
+                    -e DB_PORT=${{ secrets.DB_PORT }} \
+                    -e DB_NAME=${{ secrets.DB_NAME }} \
+                    -e DB_USER=${{ secrets.DB_USER }} \
+                    -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                    ${{ secrets.DOCKER_USERNAME }}/banco_de_horas:latest
