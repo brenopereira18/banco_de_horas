@@ -1,5 +1,6 @@
 package com.banco_de_horas.banco_de_horas.controller;
 
+import com.banco_de_horas.banco_de_horas.exceptions.CooldownActiveException;
 import com.banco_de_horas.banco_de_horas.holiday.dto.HolidayRequestDTO;
 import com.banco_de_horas.banco_de_horas.holiday.entity.HolidayEntity;
 import com.banco_de_horas.banco_de_horas.holiday.service.HolidayService;
@@ -7,6 +8,7 @@ import com.banco_de_horas.banco_de_horas.tax.dto.TaxRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxResponseDTO;
 import com.banco_de_horas.banco_de_horas.tax.dto.UpdateProfileRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
+import com.banco_de_horas.banco_de_horas.tax.service.PasswordResetTokenService;
 import com.banco_de_horas.banco_de_horas.tax.service.TaxService;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.MonthlyTimeOffUsageItemDTO;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.TimeOffUsageRequestDTO;
@@ -15,6 +17,7 @@ import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
 import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkItemDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.service.WorkService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -45,6 +48,9 @@ public class DashboardController {
 
     @Autowired
     private WorkService workService;
+
+    @Autowired
+    private PasswordResetTokenService passwordResetTokenService;
 
     @Autowired
     private TimeOffUsageService timeOffUsageService;
@@ -117,6 +123,82 @@ public class DashboardController {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @GetMapping("/esqueci-senha")
+    public String showForgotPasswordForm() {
+        return "esqueci-senha";
+    }
+
+    @PostMapping("/esqueci-senha")
+    public String processForgotPassword(
+        @RequestParam String email,
+        HttpServletRequest request,
+        RedirectAttributes redirectAttrs) {
+        try {
+            passwordResetTokenService.requestReset(email, getRealIp(request));
+        } catch (CooldownActiveException e) {
+            redirectAttrs.addFlashAttribute("erro",
+                "Você já solicitou um link recentemente. Aguarde 5 minutos.");
+            return "redirect:/banco_de_horas/dashboard/esqueci-senha";
+        }
+
+        redirectAttrs.addFlashAttribute("sucesso",
+            "Se este e-mail estiver cadastrado, você receberá as instruções em breve.");
+        return "redirect:/banco_de_horas/dashboard/esqueci-senha";
+    }
+
+    // PASSO 3 — Exibir formulário de redefinição (link do e-mail)
+    @GetMapping("/resetar-senha")
+    public String showResetPasswordForm(
+        @RequestParam(required = false) String token,
+        Model model) {
+
+        if (!passwordResetTokenService.isTokenValid(token)) {
+            model.addAttribute("tokenInvalido", true);
+            return "reset-senha";
+        }
+
+        model.addAttribute("token", token);
+        return "reset-senha";
+    }
+
+    // ---------------------------------------------------------------
+    // PASSO 4 — Salvar nova senha
+    // ---------------------------------------------------------------
+    @PostMapping("/reset-senha")
+    public String processResetPassword(
+        @RequestParam String token,
+        @RequestParam String newPassword,
+        @RequestParam String passwordConfirmation,
+        RedirectAttributes redirectAttrs) {
+
+        String validationError = passwordResetTokenService.validatePassword(newPassword, passwordConfirmation);
+        if (validationError != null) {
+            redirectAttrs.addFlashAttribute("erro", validationError);
+            return "redirect:/banco_de_horas/dashboard/reset-senha?token=" + token;
+        }
+
+        boolean success = passwordResetTokenService.resetPassword(token, newPassword);
+
+        if (success) {
+            redirectAttrs.addFlashAttribute("sucesso",
+                "Senha redefinida com sucesso! Faça login com sua nova senha.");
+            return "redirect:/banco_de_horas/dashboard/login";
+        }
+
+        redirectAttrs.addFlashAttribute("erro",
+            "Link inválido ou expirado. Solicite um novo link.");
+        return "redirect:/banco_de_horas/dashboard/esqueci-senha";
+    }
+
+    // Respeita proxy reverso (nginx, etc.) — responsabilidade HTTP
+    private String getRealIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip != null && !ip.isBlank()) {
+            return ip.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 
     @PostMapping("/alterar-senha")
