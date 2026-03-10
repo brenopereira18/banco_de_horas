@@ -29,6 +29,8 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/banco_de_horas/dashboard/esqueci-senha").permitAll()
+                .requestMatchers("/banco_de_horas/dashboard/reset-senha").permitAll()
                 .requestMatchers("/banco_de_horas/dashboard/administrador/**").hasRole("ADMINISTRADOR")
                 .anyRequest().authenticated()
             )
@@ -50,7 +52,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 
     @Bean
