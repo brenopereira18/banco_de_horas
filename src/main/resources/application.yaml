@@ -44,5 +44,20 @@ spring:
       cache:
         period: 3600
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ***REMOVED***
+    password: bpb181001
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  base-url: https://seudominio.com.br/banco_de_horas
+
 server:
   port: 8080
