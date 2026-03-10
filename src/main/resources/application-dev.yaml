@@ -48,7 +48,7 @@ spring:
         host: smtp.gmail.com
         port: 587
         username: ***REMOVED***
-        password: bpb181001
+        password: ***REMOVED***
         properties:
             mail:
                 smtp:
@@ -57,7 +57,7 @@ spring:
                         enable: true
 
 app:
-    base-url: http://localhost:8080/banco_de_horas/dashboard/login
+    base-url: http://localhost:8080/banco_de_horas
 
 server:
     port: 8080
