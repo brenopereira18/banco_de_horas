@@ -12,5 +12,7 @@ public interface TaxRepository extends JpaRepository<TaxEntity, Long> {
 
     Optional<TaxEntity> findByRegistration(String registration);
 
+    Optional<TaxEntity> findByEmail(String email);
+
     List<TaxEntity> findAllByOrderByFullNameAsc();
 }
