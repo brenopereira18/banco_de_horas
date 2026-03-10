@@ -1,0 +1,16 @@
+services:
+    ***REMOVED***:
+        container_name: ***REMOVED***_***REMOVED***
+        image: ***REMOVED***:16
+        ports:
+            - 5432:5432
+
+        environment:
+            - POSTGRES_USER=***REMOVED***
+            - POSTGRES_PASSWORD=***REMOVED***
+            - POSTGRES_DB=***REMOVED***
+        volumes:
+            - ***REMOVED***_data:/var/lib/***REMOVED***ql/data
+
+volumes:
+    ***REMOVED***_data:

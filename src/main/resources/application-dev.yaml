@@ -1,0 +1,63 @@
+spring:
+    application:
+        name: banco_de_horas
+
+    datasource:
+        url: jdbc:***REMOVED***ql://localhost:5432/***REMOVED***
+        username: ***REMOVED***
+        password: ***REMOVED***
+        driver-class-name: org.***REMOVED***ql.Driver
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
+
+    thymeleaf:
+        prefix: classpath:/templates/
+        suffix: .html
+        mode: HTML
+        encoding: UTF-8
+        cache: false
+        check-template: true
+        check-template-location: true
+        servlet:
+            content-type: text/html
+
+    devtools:
+        restart:
+            enabled: true
+            additional-paths: src/main/java
+        livereload:
+            enabled: true
+            port: 35729
+        remote:
+            restart:
+                enabled: true
+
+    web:
+        resources:
+            static-locations: classpath:/static/
+            cache:
+                period: 0
+
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: ***REMOVED***
+        password: bpb181001
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true
+
+app:
+    base-url: http://localhost:8080/banco_de_horas/dashboard/login
+
+server:
+    port: 8080
