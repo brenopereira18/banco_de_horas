@@ -1,10 +1,7 @@
 package com.banco_de_horas.banco_de_horas.tax.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,8 +37,12 @@ public class TaxEntity implements UserDetails {
     @Pattern(regexp = "\\d{5}-\\d", message = "A matrícula deve estar no formato 00000-0")
     private String registration;
 
+    @Column(name = "email")
+    private String email;
+
     @Column(name = "senha", nullable = false)
     @NotBlank(message = "Senha é obrigatória")
+    @Size(min = 7, message = "A senha deve ter no mínimo 7 caracteres")
     private String password;
 
     @Column(name = "saldo_de_horas", nullable = false, precision = 10, scale = 2)
