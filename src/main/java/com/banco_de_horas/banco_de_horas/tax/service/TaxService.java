@@ -35,6 +35,7 @@ public class TaxService {
         TaxEntity tax = TaxEntity.builder()
             .fullName(dto.fullName())
             .registration(dto.registration())
+            .email(dto.email())
             .password(passwordEncoder.encode(dto.registration()))
             .userType(dto.userType())
             .balanceOfHours(BigDecimal.ZERO)
