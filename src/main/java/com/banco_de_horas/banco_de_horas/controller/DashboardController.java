@@ -127,7 +127,7 @@ public class DashboardController {
 
     @GetMapping("/esqueci-senha")
     public String showForgotPasswordForm() {
-        return "esqueci-senha";
+        return "forget-password";
     }
 
     @PostMapping("/esqueci-senha")
@@ -149,18 +149,18 @@ public class DashboardController {
     }
 
     // PASSO 3 — Exibir formulário de redefinição (link do e-mail)
-    @GetMapping("/resetar-senha")
+    @GetMapping("/reset-senha")
     public String showResetPasswordForm(
         @RequestParam(required = false) String token,
         Model model) {
 
         if (!passwordResetTokenService.isTokenValid(token)) {
             model.addAttribute("tokenInvalido", true);
-            return "reset-senha";
+            return "reset-password";
         }
 
         model.addAttribute("token", token);
-        return "reset-senha";
+        return "reset-password";
     }
 
     // ---------------------------------------------------------------
