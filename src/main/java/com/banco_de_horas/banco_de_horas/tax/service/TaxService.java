@@ -10,6 +10,8 @@ import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
 import com.banco_de_horas.banco_de_horas.tax.repository.PasswordResetTokenRepository;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
 import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +22,13 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
+@RequiredArgsConstructor
 public class TaxService {
 
-    @Autowired
-    private TaxRepository taxRepository;
-
-    @Autowired
-    private PasswordResetTokenRepository passwordResetTokenRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final TaxRepository taxRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public TaxEntity create(TaxRequestDTO dto) {
         if (taxRepository.existsByRegistration(dto.registration())) {
@@ -45,23 +44,25 @@ public class TaxService {
             .balanceOfHours(BigDecimal.ZERO)
             .build();
 
-        return taxRepository.save(tax);
+        TaxEntity saved = taxRepository.save(tax);
+        log.info("Fiscal criado | Matrícula: {}", dto.registration());
+        return saved;
     }
 
     @Transactional(readOnly = true)
     public List<TaxResponseDTO> getAllTax() {
-        return this.taxRepository.findAllByOrderByFullNameAsc()
+        return taxRepository.findAllByOrderByFullNameAsc()
             .stream()
-            .map(tax -> {
-                return new TaxResponseDTO(
-                    tax.getId(),
-                    tax.getFullName(),
-                    TimeFormatUtils.formatHours(tax.getBalanceOfHours()),
-                    tax.getLastAddedHours()
-                );
-            }).toList();
+            .map(tax -> new TaxResponseDTO(
+                tax.getId(),
+                tax.getFullName(),
+                TimeFormatUtils.formatHours(tax.getBalanceOfHours()),
+                tax.getLastAddedHours()
+            ))
+            .toList();
     }
 
+    @Transactional(readOnly = true)
     public String validateUpdateProfile(Long id, UpdateProfileRequestDTO dto) {
         TaxEntity tax = taxRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
@@ -94,6 +95,7 @@ public class TaxService {
             tax.setPassword(passwordEncoder.encode(dto.password()));
 
         taxRepository.save(tax);
+        log.info("Perfil atualizado | Usuário ID: {}", id);
     }
 
     public TaxEntity update(Long id, TaxManagementRequestDTO dto) {
@@ -103,7 +105,9 @@ public class TaxService {
         existing.setFullName(dto.fullName());
         existing.setUserType(dto.userType());
 
-        return taxRepository.save(existing);
+        TaxEntity updated = taxRepository.save(existing);
+        log.info("Fiscal atualizado | ID: {}", id);
+        return updated;
     }
 
     public void delete(String registration) {
@@ -114,6 +118,7 @@ public class TaxService {
             .ifPresent(passwordResetTokenRepository::delete);
 
         taxRepository.delete(existing);
+        log.info("Fiscal deletado | Matrícula: {}", registration);
     }
 
     public void addHours(Long taxId, BigDecimal hours) {
@@ -127,11 +132,10 @@ public class TaxService {
         tax.addHours(hours);
         tax.setLastAddedHours(hours);
         taxRepository.save(tax);
+        log.info("Horas adicionadas | Fiscal ID: {} | Horas: {}", taxId, hours);
     }
 
-    @Transactional
     public void revertLastAddedHours(Long taxId) {
-
         TaxEntity tax = taxRepository.findById(taxId)
             .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
 
@@ -140,16 +144,16 @@ public class TaxService {
         if (lastAdded == null || lastAdded.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalStateException("Não há horas para reverter");
         }
+
         tax.subtractHours(lastAdded);
         tax.setLastAddedHours(null);
-
         taxRepository.save(tax);
+        log.info("Horas revertidas | Fiscal ID: {} | Horas revertidas: {}", taxId, lastAdded);
     }
 
+    @Transactional(readOnly = true)
     public TaxEntity findById(Long id) {
-        TaxEntity existingTax = taxRepository.findById(id)
+        return taxRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
-
-        return existingTax;
     }
 }

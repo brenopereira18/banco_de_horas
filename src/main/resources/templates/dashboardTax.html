@@ -9,32 +9,33 @@
 <body class="bg-gray-100 min-h-screen text-gray-800 font-sans h-full">
 <div class="container mx-auto p-6 max-w-7xl">
 
-    <!-- Header Section -->
+    <!-- Header -->
     <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
         <div>
             <h1 class="text-2xl flex gap-2 font-bold text-gray-900">Dashboard -
-                <span th:text="${fiscal.getUserType().getUserType()}"></span>
-                <span th:text="${fiscal.getRegistration()}"></span>
+                <span th:text="${fiscal.userType.userType}"></span>
+                <span th:text="${fiscal.registration}"></span>
             </h1>
             <p class="text-lg text-gray-600 mt-1">
-                Bem-vindo, <span th:text="${fiscal.fullName}">Breno Pereira Betti</span>
+                Bem-vindo, <span th:text="${fiscal.fullName}"></span>
             </p>
         </div>
 
         <div class="flex items-center space-x-4">
-            <button th:if="${loggedRegistration == fiscal.registration}" onclick="openProfileModal()" class="px-4 py-2 text-sm border border-gray-300 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors duration-200">
+            <button th:if="${loggedRegistration == fiscal.registration}"
+                    onclick="openProfileModal()"
+                    class="px-4 py-2 text-sm border border-gray-300 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors duration-200">
                 Alterar dados
             </button>
 
-            <!-- Botão Voltar -->
             <a th:if="${isAdmin}" href="/banco_de_horas/dashboard/administrador"
                class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm transition-colors duration-200">
-                <img th:src="@{/images/arrow-left.svg}" alt="Relógio" class="h-4 w-4"/>
+                <img th:src="@{/images/arrow-left.svg}" alt="Voltar" class="h-4 w-4"/>
                 <span>Voltar</span>
             </a>
 
-            <!-- Botão Sair -->
             <form th:action="@{/banco_de_horas/dashboard/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button type="submit"
                         class="flex items-center space-x-2 px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm transition-colors duration-200 border border-gray-300">
                     <img th:src="@{/images/arrow-right.svg}" alt="Sair" class="h-4 w-4"/>
@@ -44,10 +45,10 @@
         </div>
     </header>
 
+    <!-- Modal Alterar Dados -->
     <div id="profileModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
 
-            <!-- Cabeçalho -->
             <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-800">Alterar dados</h3>
                 <button onclick="closeProfileModal()"
@@ -58,12 +59,11 @@
                 </button>
             </div>
 
-            <!-- Select -->
             <div class="mb-5">
                 <label class="block text-sm text-gray-600 mb-1">O que deseja alterar?</label>
                 <select id="profileOption" onchange="toggleProfileFields()"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700
-                           focus:outline-none focus:ring-2 focus:ring-orange-500">
+                               focus:outline-none focus:ring-2 focus:ring-orange-500">
                     <option value="">Selecione uma opção</option>
                     <option value="password">Senha</option>
                     <option value="email">E-mail</option>
@@ -74,26 +74,21 @@
             <div id="passwordFields" class="hidden">
                 <form th:action="@{/banco_de_horas/dashboard/alterar-senha}" method="post" class="space-y-4">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Nova senha</label>
                         <input type="password" name="password" minlength="7"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md
-                                  focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                      focus:outline-none focus:ring-2 focus:ring-orange-500"
                                placeholder="Digite a nova senha"/>
-                        <p class="text-xs text-gray-400 mt-1">
-                            Mínimo 7 caracteres.
-                        </p>
+                        <p class="text-xs text-gray-400 mt-1">Mínimo 7 caracteres.</p>
                     </div>
-
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Confirmar nova senha</label>
                         <input type="password" name="passwordConfirmation" minlength="7"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md
-                                  focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                      focus:outline-none focus:ring-2 focus:ring-orange-500"
                                placeholder="Repita a nova senha"/>
                     </div>
-
                     <div class="flex justify-end gap-2 pt-2">
                         <button type="button" onclick="closeProfileModal()"
                                 class="px-3 py-1.5 text-sm bg-gray-200 rounded-md hover:bg-gray-300">
@@ -111,15 +106,13 @@
             <div id="emailFields" class="hidden">
                 <form th:action="@{/banco_de_horas/dashboard/alterar-email}" method="post" class="space-y-4">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Novo e-mail</label>
                         <input type="email" name="email"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md
-                                  focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                      focus:outline-none focus:ring-2 focus:ring-orange-500"
                                placeholder="Digite o novo e-mail"/>
                     </div>
-
                     <div class="flex justify-end gap-2 pt-2">
                         <button type="button" onclick="closeProfileModal()"
                                 class="px-3 py-1.5 text-sm bg-gray-200 rounded-md hover:bg-gray-300">
@@ -132,63 +125,60 @@
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
 
+    <!-- Mensagens de feedback -->
     <div th:if="${successMessage}"
+         data-feedback
          class="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm">
         <span th:text="${successMessage}"></span>
     </div>
 
     <div th:if="${errorMessage}"
+         data-feedback
          class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
         <span th:text="${errorMessage}"></span>
     </div>
 
-    <!-- Cards Principais (3 colunas) -->
+    <!-- Cards Principais -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
 
-        <!-- Card 1: Saldo de Horas -->
+        <!-- Card Saldo de Horas -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-sm font-medium text-gray-600">Saldo de Horas</h2>
                 <img th:src="@{/images/clock.svg}" alt="Relógio" class="h-4 w-4"/>
             </div>
-            <div class="text-2xl font-bold text-gray-900 mb-1"
-                 th:text="${formattedBalance}">
-                56,75 horas
-            </div>
+            <div class="text-2xl font-bold text-gray-900 mb-1" th:text="${formattedBalance}"></div>
             <div class="text-sm text-gray-500">
-                <span th:text="${fiscal.getBalanceInDays()}">7</span> dia/s
+                <span th:text="${fiscal.balanceInDays}"></span> dia/s
             </div>
         </div>
 
-        <!-- Card 2: Serviços Realizados -->
+        <!-- Card Horas Geradas -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-sm font-medium text-gray-600">Horas geradas</h2>
                 <img th:src="@{/images/check-circle.svg}" alt="Check" class="h-4 w-4"/>
             </div>
-            <div class="text-2xl font-bold text-gray-900" th:text="${generatedHours + ' geradas'}">0.00 horas geradas
-            </div>
+            <div class="text-2xl font-bold text-gray-900" th:text="${generatedHours + ' geradas'}"></div>
         </div>
 
-        <!-- Card 3: Folgas Utilizadas -->
+        <!-- Card Horas Utilizadas -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-sm font-medium text-gray-600">Horas utilizadas</h2>
                 <img th:src="@{/images/calendar.svg}" alt="Calendário" class="h-4 w-4"/>
             </div>
-            <div class="text-2xl font-bold text-gray-900" th:text="${hoursUsed+ ' usadas'}">0.00 horas usadas
-            </div>
+            <div class="text-2xl font-bold text-gray-900" th:text="${hoursUsed + ' usadas'}"></div>
         </div>
     </div>
 
-    <!-- Seção Principal: Duas Colunas -->
+    <!-- Seção Principal -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <!-- Coluna Esquerda: Serviços Realizados -->
+        <!-- Serviços Realizados -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-semibold text-gray-800">Serviços Realizados</h2>
@@ -198,21 +188,12 @@
                 </button>
             </div>
 
-            <!-- Lista de Serviços -->
             <div class="space-y-3">
-                <!-- Item de Serviço -->
                 <div th:each="work : ${works}"
                      class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
-
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-
-                            <!-- Título -->
-                            <h3 class="font-medium text-gray-900">
-                                <span th:text="${work.description()}">1</span>
-                            </h3>
-
-                            <!-- Data + horário -->
+                            <h3 class="font-medium text-gray-900" th:text="${work.description()}"></h3>
                             <p class="text-sm text-gray-500">
                                 <span th:text="${#temporals.format(work.startDateTime, 'dd/MM/yyyy')}"></span>
                                 •
@@ -220,28 +201,20 @@
                                 -
                                 <span th:text="${#temporals.format(work.endDateTime, 'HH:mm')}"></span>
                             </p>
-
                             <div class="flex items-center gap-2">
                                 <span class="text-sm text-gray-500 mb-1"
                                       th:text="${#temporals.format(work.startDateTime, 'EEEE')}"></span>
-
                                 <span th:if="${work.holiday}"
                                       class="ml-2 inline-block text-xs font-semibold text-blue-600 bg-blue-200 px-2 py-0.5 rounded">
                                     Feriado
                                 </span>
                             </div>
-
-
-                            <!-- Horas geradas -->
                             <div class="flex items-center space-x-4">
                                 <span class="text-sm font-medium text-green-600"
-                                      th:text="'+' + ${work.formattedGeneratedTimeOff()}">
-                                    +8,0 horas
-                                </span>
+                                      th:text="'+' + ${work.formattedGeneratedTimeOff()}"></span>
                             </div>
                         </div>
 
-                        <!-- Menu de Ações -->
                         <div th:if="${isAdmin}" class="flex space-x-1">
                             <button class="p-1 text-gray-400 hover:text-yellow-600"
                                     title="Editar"
@@ -252,12 +225,11 @@
                                     onclick="openEditModal(this)">
                                 <img th:src="@{/images/edit.svg}" class="h-4 w-4"/>
                             </button>
-                            <form th:action="@{/banco_de_horas/dashboard/excluir/servico/{id}(id=${work.id})}"
-                                  method="POST"
-                                  style="display: inline;"
+                            <form th:action="@{/banco_de_horas/dashboard/fiscal/excluir/servico/{id}(id=${work.id})}"
+                                  method="POST" class="inline"
                                   onsubmit="return confirm('Tem certeza que deseja excluir este serviço? Esta ação é irreversível.')">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                 <input type="hidden" name="taxId" th:value="${fiscal.id}"/>
-                                <input type="hidden" name="_method" value="DELETE"/>
                                 <button type="submit"
                                         class="p-1 text-gray-400 hover:text-red-600 transition-colors duration-200"
                                         title="Excluir">
@@ -269,7 +241,7 @@
                 </div>
             </div>
 
-            <!-- Controles de Paginação (APENAS para serviços) -->
+            <!-- Paginação Serviços -->
             <div th:if="${totalPages > 1}"
                  class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                 <a th:if="${hasPrevious}"
@@ -277,13 +249,10 @@
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                     ← Anterior
                 </a>
-                <span th:unless="${hasPrevious}"
-                      class="px-4 py-2 text-gray-400 text-sm">
-                    ← Anterior
-                </span>
+                <span th:unless="${hasPrevious}" class="px-4 py-2 text-gray-400 text-sm">← Anterior</span>
 
                 <span class="text-sm text-gray-600">
-                    Página <span th:text="${currentPage + 1}">1</span> de <span th:text="${totalPages}">5</span>
+                    Página <span th:text="${currentPage + 1}"></span> de <span th:text="${totalPages}"></span>
                 </span>
 
                 <a th:if="${hasNext}"
@@ -291,62 +260,46 @@
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                     Próximo →
                 </a>
-                <span th:unless="${hasNext}"
-                      class="px-4 py-2 text-gray-400 text-sm">
-                    Próximo →
-                </span>
+                <span th:unless="${hasNext}" class="px-4 py-2 text-gray-400 text-sm">Próximo →</span>
             </div>
         </div>
 
-        <!-- Coluna Direita: Histórico de Folgas -->
+        <!-- Histórico de Folgas -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-semibold text-gray-800">Histórico de Folgas</h2>
-                <button th:if="${isAdmin}" onclick="toggleTimeOffModal(true)" class="px-4 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700">
+                <button th:if="${isAdmin}" onclick="toggleTimeOffModal(true)"
+                        class="px-4 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700">
                     + Usar Folga
                 </button>
             </div>
 
-            <!-- Lista de Folgas -->
             <div class="space-y-4">
                 <div th:each="item : ${daysOffPerMonth}"
                      class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
-
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-
-                            <p class="text-sm text-gray-500">Solicitação: <span th:text="${#temporals.format(item.solicitationDate, 'dd/MM/yyyy')}"></span></p>
-
-                            <!-- Datas -->
+                            <p class="text-sm text-gray-500">
+                                Solicitação: <span th:text="${#temporals.format(item.solicitationDate, 'dd/MM/yyyy')}"></span>
+                            </p>
                             <p class="text-sm text-gray-500"
                                th:with="hasEnd=${item.endDate != null},
-                               end=${hasEnd ? item.endDate : item.startDate},
-                                onlyHours=${item.endDate == null && item.fractionalHours != null}">
-
-                                <!-- Datas -->
+                                        end=${hasEnd ? item.endDate : item.startDate},
+                                        onlyHours=${item.endDate == null && item.fractionalHours != null}">
                                 <span th:if="${item.startDate.equals(end)}"
-                                      th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')}">
-                                </span>
-
+                                      th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')}"></span>
                                 <span th:if="${!item.startDate.equals(end)}"
-                                      th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')
-                                        + ' até ' + #temporals.format(end, 'dd/MM/yyyy')}">
-                                </span>
-
-                                <!-- Dias úteis (só mostra se NÃO for apenas horas) -->
+                                      th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy') + ' até ' + #temporals.format(end, 'dd/MM/yyyy')}"></span>
                                 <span th:if="${item.businessDays > 0 && !onlyHours}">
                                     • <span th:text="${item.businessDays == 1 ? '1 dia útil' : item.businessDays + ' dias úteis'}"></span>
                                 </span>
                             </p>
-
                             <div class="flex items-center space-x-4">
                                 <span class="text-sm font-medium text-orange-600"
-                                      th:text="'-' + ${item.formattedHours()}">
-                                </span>
+                                      th:text="'-' + ${item.formattedHours()}"></span>
                             </div>
                         </div>
 
-                        <!-- Menu de Ações -->
                         <div th:if="${isAdmin}" class="flex space-x-1">
                             <button class="p-1 text-gray-400 hover:text-yellow-600"
                                     title="Editar"
@@ -358,12 +311,9 @@
                                     onclick="openEditTimeOffModal(this)">
                                 <img th:src="@{/images/edit.svg}" class="h-4 w-4"/>
                             </button>
-                            <form th:action="@{/banco_de_horas/dashboard/excluir/folga/{id}(id=${item.id})}"
-                                  method="POST"
-                                  style="display: inline;"
-                                  onsubmit="return confirm('Tem certeza que deseja excluir esta folga? Esta ação é irreversível.')">
+                            <form th:action="@{/banco_de_horas/dashboard/fiscal/excluir/folga/{id}(id=${item.id})}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta folga? Esta ação é irreversível.')">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                 <input type="hidden" name="taxId" th:value="${fiscal.id}"/>
-                                <input type="hidden" name="_method" value="DELETE"/>
                                 <button type="submit"
                                         class="p-1 text-gray-400 hover:text-red-600 transition-colors duration-200"
                                         title="Excluir">
@@ -375,7 +325,7 @@
                 </div>
             </div>
 
-            <!-- Controles de Paginação para Folgas -->
+            <!-- Paginação Folgas -->
             <div th:if="${timeOffTotalPages > 1}"
                  class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                 <a th:if="${timeOffHasPrevious}"
@@ -383,13 +333,10 @@
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                     ← Anterior
                 </a>
-                <span th:unless="${timeOffHasPrevious}"
-                      class="px-4 py-2 text-gray-400 text-sm">
-                    ← Anterior
-                </span>
+                <span th:unless="${timeOffHasPrevious}" class="px-4 py-2 text-gray-400 text-sm">← Anterior</span>
 
                 <span class="text-sm text-gray-600">
-                    Página <span th:text="${timeOffCurrentPage + 1}">1</span> de <span th:text="${timeOffTotalPages}">5</span>
+                    Página <span th:text="${timeOffCurrentPage + 1}"></span> de <span th:text="${timeOffTotalPages}"></span>
                 </span>
 
                 <a th:if="${timeOffHasNext}"
@@ -397,77 +344,57 @@
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                     Próximo →
                 </a>
-                <span th:unless="${timeOffHasNext}"
-                      class="px-4 py-2 text-gray-400 text-sm">
-                    Próximo →
-                </span>
+                <span th:unless="${timeOffHasNext}" class="px-4 py-2 text-gray-400 text-sm">Próximo →</span>
             </div>
         </div>
     </div>
 
-    <!-- Cadastrar folga -->
+    <!-- Modal Adicionar Folga -->
     <div id="addTimeOffModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
         <div class="flex items-center justify-center min-h-full p-4">
             <div class="bg-white rounded-lg p-6 w-full max-w-md">
-                <h3 class="text-xl font-bold mb-4">Usar Folga</h3>
-
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+                    <h3 class="text-xl font-bold">Usar Folga</h3>
+                    <button onclick="toggleTimeOffModal(false)" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
                 <form th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/timeoff(taxId=${fiscal.id})}"
                       method="POST" class="max-h-[480px] overflow-y-auto pr-2">
-
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <div class="mb-4">
                         <label class="block mb-2">Data de Solicitação:</label>
-                        <input type="date"
-                               name="solicitationDate"
-                               class="w-full border p-2 rounded"
-                               required>
+                        <input type="date" name="solicitationDate" class="w-full border p-2 rounded" required>
                     </div>
-
                     <div class="mb-4">
                         <label class="block mb-2">Data início:</label>
-                        <input type="date"
-                               name="startDate"
-                               class="w-full border p-2 rounded"
-                               required>
+                        <input type="date" name="startDate" class="w-full border p-2 rounded" required>
                     </div>
-
                     <div class="mb-4">
-                        <label class="block mb-2">
-                            Data fim (opcional):
-                        </label>
-                        <input type="date"
-                               name="endDate"
-                               class="w-full border p-2 rounded">
+                        <label class="block mb-2">Data fim (opcional):</label>
+                        <input type="date" name="endDate" class="w-full border p-2 rounded">
                     </div>
-
                     <div class="mb-6">
-                        <label class="block mb-2">
-                            Horas fracionadas (opcional):
-                        </label>
-                        <input type="number"
-                               step="0.5"
-                               min="0"
-                               name="partialHours"
-                               placeholder="Ex: 3"
-                               class="w-full border p-2 rounded">
+                        <label class="block mb-2">Horas fracionadas (opcional):</label>
+                        <input type="number" step="0.5" min="0" name="partialHours"
+                               placeholder="Ex: 3" class="w-full border p-2 rounded">
                     </div>
-
                     <div class="mb-4 text-xs text-gray-500 bg-gray-50 p-3">
                         Regras:
                         <ul class="list-disc pl-4 mt-1 space-y-1">
-                            <li>- Para folga de 1 dia, repita a mesma data no início e fim.</li>
-                            <li>- Para vários dias, informe o intervalo.</li>
-                            <li>- Use horas fracionadas para acrescentar horas extras.</li>
-                            <li>- Se quiser apenas horas, preencha só data de início e as horas fracionadas.</li>
+                            <li>Para folga de 1 dia, repita a mesma data no início e fim.</li>
+                            <li>Para vários dias, informe o intervalo.</li>
+                            <li>Use horas fracionadas para acrescentar horas extras.</li>
+                            <li>Se quiser apenas horas, preencha só data de início e as horas fracionadas.</li>
                         </ul>
                     </div>
-
                     <div class="flex justify-end gap-2">
-                        <button type="button"
-                                onclick="toggleTimeOffModal(false)"
+                        <button type="button" onclick="toggleTimeOffModal(false)"
                                 class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                             Cancelar
                         </button>
-
                         <button type="submit"
                                 class="bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-md px-4 py-2 transition-colors duration-200">
                             Salvar
@@ -478,71 +405,53 @@
         </div>
     </div>
 
-    <!-- Edição de folga -->
+    <!-- Modal Editar Folga -->
     <div id="editTimeOffModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
         <div class="flex items-center justify-center min-h-full p-4">
             <div class="bg-white rounded-lg p-6 w-full max-w-md">
-                <h3 class="text-xl font-bold mb-4">Editar Folga</h3>
-
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+                    <h3 class="text-xl font-bold">Editar Folga</h3>
+                    <button onclick="toggleEditTimeOffModal(false)" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
                 <form id="editTimeOffForm"
                       th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/editar/folga(taxId=${fiscal.id})}"
                       method="POST" class="max-h-[480px] overflow-y-auto pr-2">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <input type="hidden" id="editTimeOffId" name="timeOffId"/>
-
                     <div class="mb-4">
                         <label for="editSolicitationDate" class="block mb-2">Data de Solicitação:</label>
-                        <input type="date"
-                               id="editSolicitationDate"
-                               name="solicitationDate"
-                               class="w-full border p-2 rounded"
-                               required>
+                        <input type="date" id="editSolicitationDate" name="solicitationDate"
+                               class="w-full border p-2 rounded" required>
                     </div>
-
                     <div class="mb-4">
                         <label for="editStartDate" class="block mb-2">Data início:</label>
-                        <input type="date"
-                               id="editStartDate"
-                               name="startDate"
-                               class="w-full border p-2 rounded"
-                               required>
+                        <input type="date" id="editStartDate" name="startDate"
+                               class="w-full border p-2 rounded" required>
                     </div>
-
                     <div class="mb-4">
-                        <label for="editEndDate" class="block mb-2">
-                            Data fim (opcional):
-                        </label>
-                        <input type="date"
-                               id="editEndDate"
-                               name="endDate"
-                               class="w-full border p-2 rounded">
+                        <label for="editEndDate" class="block mb-2">Data fim (opcional):</label>
+                        <input type="date" id="editEndDate" name="endDate" class="w-full border p-2 rounded">
                     </div>
-
                     <div class="mb-6">
-                        <label for="editPartialHours" class="block mb-2">
-                            Horas fracionadas (opcional):
-                        </label>
-                        <input type="number"
-                               id="editPartialHours"
-                               step="0.5"
-                               min="0"
-                               name="partialHours"
-                               placeholder="Ex: 3"
-                               class="w-full border p-2 rounded">
+                        <label for="editPartialHours" class="block mb-2">Horas fracionadas (opcional):</label>
+                        <input type="number" id="editPartialHours" step="0.5" min="0"
+                               name="partialHours" placeholder="Ex: 3" class="w-full border p-2 rounded">
                     </div>
-
                     <div class="mb-4 text-xs text-gray-500 bg-gray-50 p-3">
                         Regras:
                         <ul class="list-disc pl-4 mt-1 space-y-1">
-                            <li>- Para folga de 1 dia, repita a mesma data no início e fim.</li>
-                            <li>- Para vários dias, informe o intervalo.</li>
-                            <li>- Use horas fracionadas para acrescentar horas extras.</li>
-                            <li>- Se quiser apenas horas, preencha só data de início e as horas fracionadas.</li>
+                            <li>Para folga de 1 dia, repita a mesma data no início e fim.</li>
+                            <li>Para vários dias, informe o intervalo.</li>
+                            <li>Use horas fracionadas para acrescentar horas extras.</li>
+                            <li>Se quiser apenas horas, preencha só data de início e as horas fracionadas.</li>
                         </ul>
                     </div>
-
                     <div class="flex justify-end gap-2">
-                        <button type="button"
-                                onclick="toggleEditTimeOffModal(false)"
+                        <button type="button" onclick="toggleEditTimeOffModal(false)"
                                 class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                             Cancelar
                         </button>
@@ -556,123 +465,99 @@
         </div>
     </div>
 
-    <!-- MODAL: Cadastro de múltiplos serviços -->
-    <div id="addServiceModal"
-         class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
-
+    <!-- Modal Adicionar Serviços -->
+    <div id="addServiceModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
         <div class="flex items-center justify-center min-h-full p-4">
             <div class="bg-white rounded-lg p-6 w-full max-w-md">
-
-                <h3 class="text-xl font-bold mb-4">Adicionar Serviços</h3>
-
-                <!-- CAMPOS -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                        Descrição do Serviço
-                    </label>
-                    <input type="text" id="description"
-                           class="shadow border rounded w-full py-2 px-3">
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+                    <h3 class="text-xl font-bold">Adicionar Serviços</h3>
+                    <button onclick="toggleServiceModal(false)" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
                 </div>
-
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                        Início do Serviço
-                    </label>
-                    <input type="datetime-local" id="startDateTime"
-                           class="shadow border rounded w-full py-2 px-3">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Descrição do Serviço</label>
+                    <input type="text" id="description" class="shadow border rounded w-full py-2 px-3">
                 </div>
-
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                        Fim do Serviço
-                    </label>
-                    <input type="datetime-local" id="endDateTime"
-                           class="shadow border rounded w-full py-2 px-3">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Início do Serviço</label>
+                    <input type="datetime-local" id="startDateTime" class="shadow border rounded w-full py-2 px-3">
                 </div>
-
-                <!-- BOTÃO ADICIONAR -->
-                <button type="button"
-                        onclick="addService()"
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Fim do Serviço</label>
+                    <input type="datetime-local" id="endDateTime" class="shadow border rounded w-full py-2 px-3">
+                </div>
+                <button type="button" onclick="addService()"
                         class="w-full mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                     + Adicionar serviço à lista
                 </button>
-
-                <!-- LISTA DE SERVIÇOS -->
-                <ul id="serviceList"
-                    class="space-y-2 mb-4 text-sm max-h-[120px] overflow-y-auto"></ul>
-
-                <!-- FORM FINAL -->
+                <ul id="serviceList" class="space-y-2 mb-4 text-sm max-h-[120px] overflow-y-auto"></ul>
                 <form th:action="@{/banco_de_horas/dashboard/fiscal/{id}/work/batch(id=${fiscal.id})}"
-                      method="POST"
-                      onsubmit="prepareSubmit(event)">
-
+                      method="POST" onsubmit="prepareSubmit(event)">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <input type="hidden" name="servicesJson" id="servicesJson">
-
                     <div class="flex justify-end space-x-2">
-                        <button type="button"
-                                onclick="toggleServiceModal(false)"
+                        <button type="button" onclick="toggleServiceModal(false)"
                                 class="px-4 py-2 bg-gray-200 text-gray-700 rounded">
                             Cancelar
                         </button>
-
                         <button type="submit"
                                 class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                             Cadastrar todos
                         </button>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>
 
-    <!-- Edição de serviço -->
+    <!-- Modal Editar Serviço -->
     <div id="editServiceModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
         <div class="flex items-center justify-center min-h-full p-4">
             <div class="bg-white rounded-lg p-6 w-full max-w-md">
-                <h3 class="text-xl font-bold mb-4">Editar Serviço</h3>
-
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+                    <h3 class="text-xl font-bold">Editar Serviço</h3>
+                    <button onclick="toggleEditModal(false)" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
                 <form id="editServiceForm"
                       th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/editar/servico(taxId=${fiscal.id})}"
                       method="POST">
-
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <input type="hidden" id="editWorkId" name="workId"/>
-
                     <div class="mb-4">
                         <label for="editDescription" class="block text-gray-700 text-sm font-bold mb-2">
                             Descrição do Serviço:
                         </label>
-                        <input type="text"
-                               id="editDescription"
-                               name="description"
-                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                        <input type="text" id="editDescription" name="description"
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                                      leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500">
                     </div>
-
                     <div class="mb-4">
                         <label for="editStartDateTime" class="block text-gray-700 text-sm font-bold mb-2">
                             Início do Serviço:
                         </label>
-                        <input type="datetime-local"
-                               id="editStartDateTime"
-                               name="startDateTime"
-                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        <input type="datetime-local" id="editStartDateTime" name="startDateTime"
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                                      leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500"
                                required>
                     </div>
-
                     <div class="mb-6">
                         <label for="editEndDateTime" class="block text-gray-700 text-sm font-bold mb-2">
                             Fim do Serviço:
                         </label>
-                        <input type="datetime-local"
-                               id="editEndDateTime"
-                               name="endDateTime"
-                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        <input type="datetime-local" id="editEndDateTime" name="endDateTime"
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                                      leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500"
                                required>
                     </div>
-
                     <div class="flex justify-end space-x-2">
-                        <button type="button"
-                                onclick="toggleEditModal(false)"
+                        <button type="button" onclick="toggleEditModal(false)"
                                 class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                             Cancelar
                         </button>
@@ -688,262 +573,7 @@
 
 </div>
 
-<script>
-    // Lista de serviços em memória
-    const services = [];
-
-    // =========================
-    // MODAL
-    // =========================
-    function toggleServiceModal(show) {
-        const modal = document.getElementById('addServiceModal');
-        const body = document.body;
-
-        if (show) {
-            modal.classList.remove('hidden');
-            body.classList.add('overflow-hidden');
-
-            document.getElementById('description').focus();
-        } else {
-            modal.classList.add('hidden');
-            body.classList.remove('overflow-hidden');
-
-            // Limpa tudo ao fechar
-            services.length = 0;
-            renderServices();
-            document.getElementById('description').value = '';
-            document.getElementById('startDateTime').value = '';
-            document.getElementById('endDateTime').value = '';
-        }
-    }
-
-    // Fechar ao clicar fora
-    document.getElementById('addServiceModal').addEventListener('click', function (event) {
-        if (event.target === this) {
-            toggleServiceModal(false);
-        }
-    });
-
-    // Fechar com ESC
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            toggleServiceModal(false);
-        }
-    });
-
-    // =========================
-    // ADICIONAR SERVIÇO À LISTA
-    // =========================
-    function addService() {
-        const startDateTime = document.getElementById('startDateTime').value;
-        const endDateTime = document.getElementById('endDateTime').value;
-
-        // descrição é GLOBAL
-        const description = document.getElementById('description').value.trim();
-
-        // valida SOMENTE datas
-        if (!startDateTime || !endDateTime) {
-            alert('Informe data/hora de início e fim.');
-            return;
-        }
-
-        const now = new Date();
-        const start = new Date(startDateTime);
-        const end = new Date(endDateTime);
-
-        if (start >= end) {
-            alert('A data/hora de início deve ser anterior à de fim.');
-            return;
-        }
-
-        if (start > now) {
-            alert('A data de início não pode ser no futuro.');
-            return;
-        }
-
-        if (end > now) {
-            alert('A data de fim não pode ser no futuro.');
-            return;
-        }
-
-        services.push({
-            description: description,
-            startDateTime,
-            endDateTime
-        });
-
-        renderServices();
-
-        // NÃO limpa a descrição
-        document.getElementById('startDateTime').value = '';
-        document.getElementById('endDateTime').value = '';
-        document.getElementById('startDateTime').focus();
-    }
-
-    // =========================
-    // RENDERIZA LISTA
-    // =========================
-    function renderServices() {
-        const list = document.getElementById('serviceList');
-        list.innerHTML = '';
-
-        services.forEach((service, index) => {
-            list.innerHTML += `
-            <li class="flex justify-between items-center bg-gray-100 p-2 rounded">
-                <div>
-                    ${service.description ? `<div class="text-sm font-semibold">${service.description}</div>` : ''}
-                    <span class="text-xs text-gray-600">
-                        ${service.startDateTime} → ${service.endDateTime}
-                    </span>
-                </div>
-                <button type="button"
-                    onclick="removeService(${index})"
-                    class="text-red-600 text-xs hover:underline">
-                    Remover
-                </button>
-            </li>
-            `;
-        });
-    }
-
-    function removeService(index) {
-        services.splice(index, 1);
-        renderServices();
-    }
-
-    // =========================
-    // SUBMIT FINAL (BATCH)
-    // =========================
-    function prepareSubmit(event) {
-        if (services.length === 0) {
-            alert('Adicione pelo menos um período.');
-            event.preventDefault();
-            return;
-        }
-
-        // Apenas envia o JSON com todos os serviços (já incluindo description)
-        document.getElementById('servicesJson').value = JSON.stringify(services);
-    }
-
-    document.getElementById('editServiceForm').addEventListener('submit', function(e) {
-        const now = new Date();
-        const start = new Date(document.getElementById('editStartDateTime').value);
-        const end = new Date(document.getElementById('editEndDateTime').value);
-
-        if (start > now) {
-            e.preventDefault();
-            alert('A data de início não pode ser no futuro.');
-            return;
-        }
-
-        if (end > now) {
-            e.preventDefault();
-            alert('A data de fim não pode ser no futuro.');
-            return;
-        }
-
-        if (end <= start) {
-            e.preventDefault();
-            alert('A data de fim deve ser após o início.');
-            return;
-        }
-    });
-
-    function openEditModal(button) {
-        document.getElementById('editWorkId').value =
-            button.dataset.id;
-
-        document.getElementById('editDescription').value =
-            button.dataset.description || '';
-
-        document.getElementById('editStartDateTime').value =
-            button.dataset.start;
-
-        document.getElementById('editEndDateTime').value =
-            button.dataset.end;
-
-        toggleEditModal(true);
-    }
-
-    function toggleEditModal(show) {
-        const modal = document.getElementById('editServiceModal');
-        if (show) {
-            modal.classList.remove('hidden');
-        } else {
-            modal.classList.add('hidden');
-        }
-    }
-
-    // Fechar modal ao clicar fora dela
-    document.getElementById('editServiceModal')?.addEventListener('click', function (e) {
-        if (e.target === this) {
-            toggleEditModal(false);
-        }
-    });
-
-    function toggleTimeOffModal(show) {
-        const modal = document.getElementById('addTimeOffModal');
-        modal.classList.toggle('hidden', !show);
-    }
-
-    document.getElementById('addTimeOffModal')
-        ?.addEventListener('click', function (e) {
-            if (e.target === this) toggleTimeOffModal(false);
-        });
-
-    function openEditTimeOffModal(button) {
-        const id = button.getAttribute('data-id');
-        const solicitationDate = button.getAttribute('data-solicitation')
-        const startDate = button.getAttribute('data-start');
-        const endDate = button.getAttribute('data-end');
-        const partialHours = button.getAttribute('data-partial');
-
-        document.getElementById('editTimeOffId').value = id;
-        document.getElementById('editSolicitationDate').value = solicitationDate;
-        document.getElementById('editStartDate').value = startDate;
-        document.getElementById('editEndDate').value = endDate || '';
-        document.getElementById('editPartialHours').value = partialHours || '';
-
-        toggleEditTimeOffModal(true);
-    }
-
-    function toggleEditTimeOffModal(show) {
-        const modal = document.getElementById('editTimeOffModal');
-        if (show) {
-            modal.classList.remove('hidden');
-        } else {
-            modal.classList.add('hidden');
-        }
-    }
-
-    function openProfileModal() {
-        document.getElementById('profileModal').classList.remove('hidden');
-    }
-
-    function closeProfileModal() {
-        document.getElementById('profileModal').classList.add('hidden');
-        document.getElementById('profileOption').value = '';
-        document.getElementById('passwordFields').classList.add('hidden');
-        document.getElementById('emailFields').classList.add('hidden');
-    }
-
-    function toggleProfileFields() {
-        const option = document.getElementById('profileOption').value;
-        document.getElementById('passwordFields').classList.add('hidden');
-        document.getElementById('emailFields').classList.add('hidden');
-
-        if (option === 'password')
-            document.getElementById('passwordFields').classList.remove('hidden');
-        else if (option === 'email')
-            document.getElementById('emailFields').classList.remove('hidden');
-    }
-
-    // Fecha clicando fora do modal
-    document.getElementById('profileModal').addEventListener('click', function(e) {
-        if (e.target === this) closeProfileModal()
-    });
-
-
-</script>
+<script th:src="@{/js/utils.js}"></script>
+<script th:src="@{/js/taxPage.js}"></script>
 </body>
 </html>

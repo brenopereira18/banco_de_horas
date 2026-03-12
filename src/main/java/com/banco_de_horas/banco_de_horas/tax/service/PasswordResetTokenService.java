@@ -8,6 +8,7 @@ import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -27,29 +29,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PasswordResetTokenService {
 
-    @Autowired
-    private PasswordResetTokenRepository passwordResetTokenRepository;
-
-    @Autowired
-    private TaxRepository taxRepository;
-
-    @Autowired
-    private JavaMailSender mailSender;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final TaxRepository taxRepository;
+    private final JavaMailSender mailSender;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${app.base-url}")
     private String baseUrl;
 
-    // Rate limiting por IP
     private final Map<String, Bucket> bucketsByIp = new ConcurrentHashMap<>();
 
-    // ---------------------------------------------------------------
-    // PASSO 1 — Solicitar redefinição de senha
-    // ---------------------------------------------------------------
+    @Transactional
     public void requestReset(String email, String ip) {
 
         if (!consumeRateLimit(ip)) {
@@ -72,6 +65,7 @@ public class PasswordResetTokenService {
                 log.info("Cooldown ativo para o usuário ID: {} | IP: {}", tax.getId(), ip);
                 throw new CooldownActiveException();
             }
+            // Token antigo existe — deleta antes de criar novo para garantir uso único
             passwordResetTokenRepository.delete(existingToken);
         });
 
@@ -88,14 +82,13 @@ public class PasswordResetTokenService {
 
         passwordResetTokenRepository.save(newToken);
 
+        // E-mail enviado após salvar o token — falha no envio não reverte o token
         sendEmailAsync(tax.getEmail(), tax.getFullName(), rawToken);
 
         log.info("Redefinição de senha solicitada | Usuário ID: {} | IP: {}", tax.getId(), ip);
     }
 
-    // ---------------------------------------------------------------
-    // PASSO 2 — Validar token (para decidir se exibe o formulário)
-    // ---------------------------------------------------------------
+    @Transactional(readOnly = true)
     public boolean isTokenValid(String rawToken) {
         if (rawToken == null || rawToken.isBlank()) return false;
 
@@ -115,9 +108,7 @@ public class PasswordResetTokenService {
         return null;
     }
 
-    // ---------------------------------------------------------------
-    // PASSO 3 — Redefinir a senha
-    // ---------------------------------------------------------------
+    @Transactional
     public boolean resetPassword(String rawToken, String newPassword) {
         if (rawToken == null || rawToken.isBlank()) return false;
 
@@ -149,6 +140,7 @@ public class PasswordResetTokenService {
         tax.setPassword(passwordEncoder.encode(newPassword));
         taxRepository.save(tax);
 
+        // Marca como utilizado — mantém histórico para auditoria
         token.setUsed(true);
         passwordResetTokenRepository.save(token);
 
@@ -156,9 +148,6 @@ public class PasswordResetTokenService {
         return true;
     }
 
-    // ---------------------------------------------------------------
-    // Envio de e-mail assíncrono
-    // ---------------------------------------------------------------
     @Async
     public void sendEmailAsync(String email, String nome, String rawToken) {
         try {
@@ -184,9 +173,7 @@ public class PasswordResetTokenService {
         }
     }
 
-    // ---------------------------------------------------------------
-    // Rate limiting — máximo 3 tentativas a cada 15 minutos por IP
-    // ---------------------------------------------------------------
+    // Rate limiting — token bruto enviado por e-mail, apenas o hash é persistido
     private boolean consumeRateLimit(String ip) {
         Bucket bucket = bucketsByIp.computeIfAbsent(ip, k ->
             Bucket.builder()
