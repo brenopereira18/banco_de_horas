@@ -9,6 +9,8 @@ import com.banco_de_horas.banco_de_horas.timeOffUsage.dto.TimeOffUsageRequestDTO
 import com.banco_de_horas.banco_de_horas.timeOffUsage.entity.TimeOffUsageEntity;
 import com.banco_de_horas.banco_de_horas.timeOffUsage.repository.TimeOffUsageRepository;
 import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,20 +24,14 @@ import java.time.LocalDate;
 
 @Service
 @Transactional
+@Slf4j
+@RequiredArgsConstructor
 public class TimeOffUsageService {
 
-    @Autowired
-    private TimeOffUsageRepository timeOffUsageRepository;
+    private final TimeOffUsageRepository timeOffUsageRepository;
+    private final TaxRepository taxRepository;
+    private final HolidayRepository holidayRepository;
 
-    @Autowired
-    private TaxRepository taxRepository;
-
-    @Autowired
-    private HolidayRepository holidayRepository;
-
-    /**
-     * Cria folga
-     */
     public TimeOffUsageEntity create(TimeOffUsageRequestDTO dto) {
         TaxEntity tax = taxRepository.findById(dto.taxId())
             .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
@@ -57,14 +53,12 @@ public class TimeOffUsageService {
             .build();
 
         applyBusinessRules(usage);
-        return timeOffUsageRepository.save(usage);
+        TimeOffUsageEntity saved = timeOffUsageRepository.save(usage);
+        log.info("Folga criada | Fiscal ID: {} | Horas: {}", tax.getId(), hoursToDebit);
+        return saved;
     }
 
-    /**
-     * Atualiza folga
-     */
     public TimeOffUsageEntity update(Long id, TimeOffUsageRequestDTO dto) {
-
         TimeOffUsageEntity existing = timeOffUsageRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Uso de folga não encontrado"));
 
@@ -84,138 +78,30 @@ public class TimeOffUsageService {
         existing.setHoursUsed(hoursToDebit);
         applyBusinessRules(existing);
 
-        return timeOffUsageRepository.save(existing);
+        TimeOffUsageEntity updated = timeOffUsageRepository.save(existing);
+        log.info("Folga atualizada | ID: {} | Novas horas: {}", id, hoursToDebit);
+        return updated;
     }
 
-    /**
-     * Calcula horas usadas na folga
-     */
-    private BigDecimal calculateHours(LocalDate start, LocalDate end, BigDecimal fractional,
-        TaxEntity tax) {
-        if (start == null) {
-            throw new IllegalArgumentException("Data inicial obrigatória");
-        }
+    public void delete(Long id) {
+        TimeOffUsageEntity existing = timeOffUsageRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Folga não encontrada"));
 
-        BigDecimal total = BigDecimal.ZERO;
-
-        // Se só tem horas fracionadas (sem período de dias), retorna só elas
-        if (end == null && fractional != null && fractional.compareTo(BigDecimal.ZERO) > 0) {
-            return fractional;
-        }
-
-        BigDecimal hoursPerDay = getDailyLimit(tax);
-        LocalDate finalDate = (end != null) ? end : start;
-
-        if (finalDate.isBefore(start)) {
-            throw new IllegalArgumentException("Data final inválida");
-        }
-
-        LocalDate current = start;
-
-        while (!current.isAfter(finalDate)) {
-            if (isBusinessDay(current)) {
-                total = total.add(hoursPerDay);
-            }
-            current = current.plusDays(1);
-        }
-
-        // horas extras (só soma se tiver período de dias também)
-        if (fractional != null && fractional.compareTo(BigDecimal.ZERO) > 0) {
-            total = total.add(fractional);
-        }
-
-        return total;
-    }
-
-    /**
-     * Verifica dia da semana
-     */
-    private boolean isBusinessDay(LocalDate date) {
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-
-        // fim de semana
-        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
-            return false;
-        }
-
-        // feriado
-        return !holidayRepository.existsByDate(date);
-    }
-
-    /**
-     * conta quantos dias úteis foram de folga
-     */
-    private long calculateBusinessDays(LocalDate start, LocalDate end) {
-        if (start == null) return 0;
-
-        LocalDate finalDate = (end != null) ? end : start;
-        long count = 0;
-        LocalDate current = start;
-
-        while (!current.isAfter(finalDate)) {
-            if (isBusinessDay(current)) {
-                count++;
-            }
-            current = current.plusDays(1);
-        }
-
-        return count;
-    }
-
-    /**
-     * limite de horas por dia
-     */
-    private BigDecimal getDailyLimit(TaxEntity tax) {
-        return switch (tax.getUserType()) {
-            case FISCAL -> BigDecimal.valueOf(6);
-            case SUPERVISOR, ADMINISTRADOR -> BigDecimal.valueOf(8);
-        };
-    }
-
-    /**
-     * Aplica regras e debita saldo
-     */
-    private void applyBusinessRules(TimeOffUsageEntity usage) {
-
-        TaxEntity tax = usage.getTaxEntity();
-        BigDecimal hoursUsed = usage.getHoursUsed();
-
-        if (hoursUsed == null || hoursUsed.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Horas utilizadas inválidas");
-        }
-
-        if (tax.getBalanceOfHours().compareTo(hoursUsed) < 0) {
-            throw new IllegalStateException("Saldo de horas insuficiente");
-        }
-
-        tax.subtractHours(hoursUsed);
+        // Devolve as horas da folga ao saldo do fiscal antes de deletar
+        TaxEntity tax = existing.getTaxEntity();
+        tax.addHours(existing.getHoursUsed());
         taxRepository.save(tax);
+
+        timeOffUsageRepository.delete(existing);
+        log.info("Folga deletada | ID: {} | Horas devolvidas: {}", id, existing.getHoursUsed());
     }
 
-    /**
-     * Reverte saldo
-     */
-    private void restoreTaxBalance(TimeOffUsageEntity usage) {
-
-        BigDecimal hoursUsed = usage.getHoursUsed();
-
-        if (hoursUsed != null && hoursUsed.compareTo(BigDecimal.ZERO) > 0) {
-            TaxEntity tax = usage.getTaxEntity();
-            tax.addHours(hoursUsed);
-            taxRepository.save(tax);
-        }
-    }
-
-    /**
-     * Horas usadas em folga
-     */
+    @Transactional(readOnly = true)
     public BigDecimal getHoursUsed(TaxEntity tax) {
         return timeOffUsageRepository.sumAllHoursUsedByTax(tax);
     }
 
-    /**
-     * busca folgas do usuário por ordem de cadastro
-     */
+    @Transactional(readOnly = true)
     public Page<MonthlyTimeOffUsageItemDTO> getAllTimeUsage(TaxEntity tax, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -233,13 +119,101 @@ public class TimeOffUsageService {
             ));
     }
 
-    public void delete(Long id) {
-        TimeOffUsageEntity existing = timeOffUsageRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Folga não encontrada"));
+    // Horas fracionadas sem período de dias retornam apenas as horas fracionadas
+    private BigDecimal calculateHours(LocalDate start, LocalDate end, BigDecimal fractional,
+                                      TaxEntity tax) {
+        if (start == null) {
+            throw new IllegalArgumentException("Data inicial obrigatória");
+        }
 
-        TaxEntity tax = existing.getTaxEntity();
-        tax.addHours(existing.getHoursUsed());
+        if (end == null && fractional != null && fractional.compareTo(BigDecimal.ZERO) > 0) {
+            return fractional;
+        }
+
+        BigDecimal hoursPerDay = getDailyLimit(tax);
+        LocalDate finalDate = (end != null) ? end : start;
+
+        if (finalDate.isBefore(start)) {
+            throw new IllegalArgumentException("Data final inválida");
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+        LocalDate current = start;
+
+        while (!current.isAfter(finalDate)) {
+            if (isBusinessDay(current)) {
+                total = total.add(hoursPerDay);
+            }
+            current = current.plusDays(1);
+        }
+
+        // Horas fracionadas somadas ao total apenas quando há período de dias
+        if (fractional != null && fractional.compareTo(BigDecimal.ZERO) > 0) {
+            total = total.add(fractional);
+        }
+
+        return total;
+    }
+
+    private boolean isBusinessDay(LocalDate date) {
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            return false;
+        }
+
+        return !holidayRepository.existsByDate(date);
+    }
+
+    private long calculateBusinessDays(LocalDate start, LocalDate end) {
+        if (start == null) return 0;
+
+        LocalDate finalDate = (end != null) ? end : start;
+        long count = 0;
+        LocalDate current = start;
+
+        while (!current.isAfter(finalDate)) {
+            if (isBusinessDay(current)) {
+                count++;
+            }
+            current = current.plusDays(1);
+        }
+
+        return count;
+    }
+
+    // Fiscal tem jornada de 6h, supervisor e administrador de 8h
+    private BigDecimal getDailyLimit(TaxEntity tax) {
+        return switch (tax.getUserType()) {
+            case FISCAL -> BigDecimal.valueOf(6);
+            case SUPERVISOR, ADMINISTRADOR -> BigDecimal.valueOf(8);
+        };
+    }
+
+    private void applyBusinessRules(TimeOffUsageEntity usage) {
+        TaxEntity tax = usage.getTaxEntity();
+        BigDecimal hoursUsed = usage.getHoursUsed();
+
+        if (hoursUsed == null || hoursUsed.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Horas utilizadas inválidas");
+        }
+
+        if (tax.getBalanceOfHours().compareTo(hoursUsed) < 0) {
+            throw new IllegalStateException("Saldo de horas insuficiente");
+        }
+
+        tax.subtractHours(hoursUsed);
         taxRepository.save(tax);
-        timeOffUsageRepository.delete(existing);
+    }
+
+    // Restaura o saldo de horas adicionadas
+    private void restoreTaxBalance(TimeOffUsageEntity usage) {
+        BigDecimal hoursUsed = usage.getHoursUsed();
+
+        if (hoursUsed != null && hoursUsed.compareTo(BigDecimal.ZERO) > 0) {
+            TaxEntity tax = usage.getTaxEntity();
+            tax.addHours(hoursUsed);
+            taxRepository.save(tax);
+        }
     }
 }

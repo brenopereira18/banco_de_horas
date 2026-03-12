@@ -5,6 +5,8 @@ import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
 import com.banco_de_horas.banco_de_horas.holiday.dto.HolidayRequestDTO;
 import com.banco_de_horas.banco_de_horas.holiday.entity.HolidayEntity;
 import com.banco_de_horas.banco_de_horas.holiday.repository.HolidayRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -15,10 +17,11 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
+@RequiredArgsConstructor
 public class HolidayService {
 
-    @Autowired
-    private HolidayRepository holidayRepository;
+    private final HolidayRepository holidayRepository;
 
     public HolidayEntity create(HolidayRequestDTO dto) {
         if (holidayRepository.existsByDate(dto.date())) {
@@ -30,28 +33,34 @@ public class HolidayService {
             .description(dto.description())
             .build();
 
-        return holidayRepository.save(holiday);
+        HolidayEntity saved = holidayRepository.save(holiday);
+        log.info("Feriado criado | Data: {} | Descrição: {}", dto.date(), dto.description());
+        return saved;
     }
 
     public HolidayEntity update(Long id, HolidayRequestDTO dto) {
         HolidayEntity existing = holidayRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Feriado não encontrado"));
 
-        if (!existing.getDate().equals(dto.date())
-            && holidayRepository.existsByDate(dto.date())) {
+        // Valida data duplicada apenas se a data foi alterada
+        if (!existing.getDate().equals(dto.date()) && holidayRepository.existsByDate(dto.date())) {
             throw new EntityAlreadyExists("Já existe feriado nessa data");
         }
 
         existing.setDate(dto.date());
         existing.setDescription(dto.description());
-        return holidayRepository.save(existing);
+
+        HolidayEntity updated = holidayRepository.save(existing);
+        log.info("Feriado atualizado | ID: {} | Nova data: {}", id, dto.date());
+        return updated;
     }
 
     public void delete(Long id) {
-        HolidayEntity existing = holidayRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Feriado não encontrado"));
-
-        holidayRepository.delete(existing);
+        if (!holidayRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Feriado não encontrado");
+        }
+        holidayRepository.deleteById(id);
+        log.info("Feriado deletado | ID: {}", id);
     }
 
     @Transactional(readOnly = true)

@@ -11,14 +11,15 @@
 
 <div class="container mx-auto p-6 max-w-7xl">
 
-    <!-- Header Section -->
+    <!-- Header -->
     <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard - <span th:text="${user.getUserType()}">ADMINISTRADOR</span></h1>
-            <p class="text-lg text-gray-600 mt-1">Bem-vindo, <span th:text="${user.getFullName()}">Eduardo</span></p>
+            <h1 class="text-2xl font-bold text-gray-900">Dashboard - <span th:text="${user.userType}">ADMINISTRADOR</span></h1>
+            <p class="text-lg text-gray-600 mt-1">Bem-vindo, <span th:text="${user.fullName}">Eduardo</span></p>
         </div>
         <div>
             <form th:action="@{/banco_de_horas/dashboard/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button type="submit"
                         class="flex items-center space-x-2 px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm transition-colors duration-200 border border-gray-300">
                     <img th:src="@{/images/arrow-right.svg}" alt="Sair" class="h-4 w-4"/>
@@ -41,18 +42,14 @@
         <div class="flex-grow border-b border-gray-200 -mb-px"></div>
     </nav>
 
-    <!-- Main Content Area: Lista de Fiscais -->
+    <!-- Lista de Fiscais -->
     <main th:if="${activeTab == 'fiscais'}" class="bg-white p-6 rounded-lg shadow-md">
         <div class="flex items-start justify-between sm:items-center mb-4 pb-4 border-b border-gray-200">
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 flex-1">
                 <h2 class="text-xl font-semibold text-gray-800">Lista de Fiscais</h2>
-
-                <!-- Campo de Busca -->
                 <div class="flex-1 max-w-md">
                     <div class="relative">
-                        <input type="text"
-                               id="searchFiscal"
-                               placeholder="Buscar por nome..."
+                        <input type="text" id="searchFiscal" placeholder="Buscar por nome..."
                                class="w-44 sm:w-48 pl-10 pr-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <img th:src="@{/images/search.svg}" alt="Ícone" class="mr-2 h-4 w-4"/>
@@ -64,16 +61,12 @@
                 <button onclick="toggleModal(true)"
                         class="inline-flex items-center px-2 sm:px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                     <img th:src="@{/images/user-plus.svg}" alt="Ícone" class="sm:mr-2 w-5 h-5 sm:h-4 sm:w-4"/>
-                    <span class="hidden sm:inline">
-                        Adicionar Fiscal
-                    </span>
+                    <span class="hidden sm:inline">Adicionar Fiscal</span>
                 </button>
                 <button onclick="toggleDeleteModal(true)"
                         class="inline-flex items-center px-2 sm:px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
                     <img th:src="@{/images/user-minus.svg}" alt="Ícone" class="sm:mr-2 w-5 h-5 sm:h-4 sm:w-4"/>
-                    <span class="hidden sm:inline">
-                        Remover Fiscal
-                    </span>
+                    <span class="hidden sm:inline">Remover Fiscal</span>
                 </button>
             </div>
         </div>
@@ -83,36 +76,19 @@
                  class="fiscal-item flex items-center justify-between p-2 border-b border-gray-150 last:border-b-0 hover:bg-gray-100 rounded-md transition-colors duration-150 overflow-x-auto whitespace-nowrap sm:overflow-visible"
                  th:data-name="${fiscal.fullName()}">
 
-                <!-- Dados do Fiscal -->
                 <div class="flex-1 whitespace-nowrap">
-                    <p class="font-semibold text-gray-700"
-                       th:text="${fiscal.fullName()}">
-                        Nome Completo do Fiscal
-                    </p>
-
+                    <p class="font-semibold text-gray-700" th:text="${fiscal.fullName()}"></p>
                     <p class="text-sm text-green-600">
-                        Saldo de Horas:
-                        <span class="font-medium"
-                              th:text="${fiscal.balanceOfHours()}">
-                    0,00
-                </span>
+                        Saldo de Horas: <span class="font-medium" th:text="${fiscal.balanceOfHours()}"></span>
                     </p>
                 </div>
 
                 <div class="flex pl-14 sm:pl-0 items-center gap-2">
-                    <!-- Input de horas -->
                     <form th:action="@{/banco_de_horas/dashboard/administrador/fiscal/{id}/add-hours(id=${fiscal.id()})}"
-                          method="POST"
-                          class="flex items-center gap-1">
-
-                        <input type="number"
-                               step="0.01"
-                               min="0"
-                               name="hours"
-                               placeholder="+ horas"
-                               class="w-20 text-xs border rounded px-2 py-1"
-                               required>
-
+                          method="POST" class="flex items-center gap-1">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="number" step="0.01" min="0" name="hours" placeholder="+ horas"
+                               class="w-20 text-xs border rounded px-2 py-1" required>
                         <button type="submit"
                                 class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200">
                             +
@@ -121,6 +97,7 @@
 
                     <form th:action="@{/banco_de_horas/dashboard/administrador/fiscal/{id}/revert-hours(id=${fiscal.id()})}"
                           method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <button type="submit"
                                 th:title="'Última adição: ' + (${fiscal.lastAddedHours} != null ? ${fiscal.lastAddedHours} : 0)"
                                 class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">
@@ -128,7 +105,6 @@
                         </button>
                     </form>
 
-                    <!-- Ver detalhes -->
                     <a th:href="@{/banco_de_horas/dashboard/fiscal/{id}(id=${fiscal.id()})}"
                        class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">
                         Ver Detalhes
@@ -137,17 +113,16 @@
             </div>
         </div>
 
-        <!-- Mensagem quando não há resultados da busca -->
         <div id="noResults" class="hidden text-center py-8 text-gray-500">
             <p>Nenhum fiscal encontrado.</p>
         </div>
 
-        <!-- Mensagem quando não existem fiscais cadastrados -->
         <div th:if="${fiscais.isEmpty()}" class="text-center py-8 text-gray-500">
             <p>Nenhum fiscal cadastrado.</p>
         </div>
     </main>
 
+    <!-- Lista de Feriados -->
     <main th:if="${activeTab == 'feriados'}" class="bg-white p-6 rounded-lg shadow-md">
         <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
             <h2 class="text-xl font-semibold text-gray-800">Lista de Feriados</h2>
@@ -158,37 +133,32 @@
             </button>
         </div>
 
-        <!-- Lista Vazia de Feriados -->
         <div th:if="${feriados.isEmpty()}" class="text-gray-500 italic text-center py-8">
             Nenhum feriado cadastrado
         </div>
 
         <div class="max-h-96 overflow-y-auto mr-1">
             <div th:unless="${feriados.isEmpty()}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-
                 <div th:each="feriado : ${feriados}"
                      class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
 
-                    <!-- Header do Card -->
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center space-x-2">
                             <div class="w-3 h-3 rounded-full bg-purple-500"></div>
                             <span class="text-xs font-medium text-purple-600">Feriado</span>
                         </div>
-
-                        <!-- Menu de Ações -->
                         <div class="flex space-x-1">
                             <button class="p-1 text-gray-400 hover:text-yellow-600 transition-colors duration-200"
-                                    title="Editar" th:data-id="${feriado.id}"
+                                    title="Editar"
+                                    th:data-id="${feriado.id}"
                                     th:data-date="${#temporals.format(feriado.date, 'yyyy-MM-dd')}"
                                     th:data-description="${feriado.description}">
                                 <img th:src="@{/images/edit.svg}" alt="Editar" class="h-4 w-4"/>
                             </button>
                             <form th:action="@{/banco_de_horas/dashboard/excluir/feriado/{id}(id=${feriado.id})}"
-                                  method="POST"
-                                  style="display: inline;"
+                                  method="POST" class="inline"
                                   onsubmit="return confirm('Tem certeza que deseja excluir este feriado? Esta ação é irreversível.')">
-                                <input type="hidden" name="_method" value="DELETE"/>
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                 <button type="submit"
                                         class="p-1 text-gray-400 hover:text-red-600 transition-colors duration-200"
                                         title="Excluir">
@@ -198,64 +168,53 @@
                         </div>
                     </div>
 
-                    <!-- Conteúdo Principal do Card -->
                     <div>
-                        <h3 class="font-semibold text-gray-800 text-sm mb-1 line-clamp-2" th:text="${feriado.description}">
-                            Descrição do Feriado
-                        </h3>
-
+                        <h3 class="font-semibold text-gray-800 text-sm mb-1 line-clamp-2"
+                            th:text="${feriado.description}"></h3>
                         <div class="flex items-center text-sm text-gray-600">
                             <img th:src="@{/images/calendar.svg}" alt="Calendário" class="mr-1 h-4 w-4"/>
-                            <span th:text="${#temporals.format(feriado.date, 'dd/MM/yyyy -')}"
-                                  class="mr-1">01/01/2024</span>
+                            <span th:text="${#temporals.format(feriado.date, 'dd/MM/yyyy -')}" class="mr-1"></span>
                             <span class="text-xs text-gray-500"
-                                  th:text="${#temporals.format(feriado.date, 'EEEE', #locale)}" th:with="locale=${#locale}">
-                        Segunda-feira
-                    </span>
+                                  th:text="${#temporals.format(feriado.date, 'EEEE', #locale)}"></span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-
 </div>
 
-<!-- Modal para Adicionar Fiscal -->
+<!-- Modal Adicionar Fiscal -->
 <div id="addFiscalModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
         <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
             <h3 class="text-xl font-semibold text-gray-800">Adicionar Novo Fiscal</h3>
-            <button onclick="toggleModal(false)"
-                    class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+            <button onclick="toggleModal(false)" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
-
         <form id="addFiscalForm" th:action="@{/banco_de_horas/dashboard/administrador/criar/fiscal}" method="POST">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="mb-4">
                 <label for="fullName" class="block text-gray-700 text-sm font-bold mb-2">Nome Completo:</label>
                 <input type="text" id="fullName" name="fullName" placeholder="Digite o nome completo"
                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                        required>
             </div>
-
             <div class="mb-4">
                 <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-                <input type="text" id="email" name="email" placeholder="Digite o email:"
+                <input type="email" id="email" name="email" placeholder="Digite o email"
                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                        required>
             </div>
-
             <div class="mb-4">
                 <label for="registration" class="block text-gray-700 text-sm font-bold mb-2">Matrícula:</label>
                 <input type="text" id="registration" name="registration" placeholder="Digite a matrícula"
                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                        required oninput="formatRegistration(this)">
             </div>
-
             <div class="mb-6">
                 <label for="userType" class="block text-gray-700 text-sm font-bold mb-2">Tipo de Usuário:</label>
                 <select id="userType" name="userType"
@@ -267,7 +226,6 @@
                     <option value="ADMINISTRADOR">Administrador</option>
                 </select>
             </div>
-
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="toggleModal(false)"
                         class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
@@ -282,51 +240,43 @@
     </div>
 </div>
 
-<!-- Modal para Remover Fiscal -->
+<!-- Modal Remover Fiscal -->
 <div id="deleteFiscalModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
         <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
             <h3 class="text-xl font-semibold text-gray-800">Remover Fiscal</h3>
-            <button onclick="toggleDeleteModal(false)"
-                    class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+            <button onclick="toggleDeleteModal(false)" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
-
-        <!-- Aviso -->
         <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-5 text-sm">
             <span>Esta ação é irreversível. O fiscal será permanentemente removido.</span>
         </div>
-
         <form id="deleteFiscalForm" method="POST"
               th:action="@{/banco_de_horas/dashboard/administrador/deletar/fiscal}">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
             <div class="mb-6">
                 <label for="registrationDelete" class="block text-gray-700 text-sm font-bold mb-2">
                     Matrícula do Fiscal:
                 </label>
-                <input type="text" id="registrationDelete" name="registration"
-                       placeholder="Digite a matrícula"
+                <input type="text" id="registrationDelete" name="registration" placeholder="Digite a matrícula"
                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
-                      leading-tight focus:outline-none focus:ring-2 focus:ring-red-500
-                      focus:border-red-500"
+                              leading-tight focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                        required oninput="formatRegistration(this)">
             </div>
-
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="toggleDeleteModal(false)"
                         class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white
-                       hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
-                       focus:ring-red-500 transition-colors duration-200">
+                               hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
+                               focus:ring-red-500 transition-colors duration-200">
                     Cancelar
                 </button>
                 <button type="submit"
                         class="px-4 py-2 border border-transparent rounded-md shadow-sm text-white
-                       bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2
-                       focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                               bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2
+                               focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
                     Confirmar Remoção
                 </button>
             </div>
@@ -334,24 +284,30 @@
     </div>
 </div>
 
-<!-- Modal para Adicionar Feriado -->
+<!-- Modal Adicionar Feriado -->
 <div id="addHolidayModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
     <div class="flex items-center justify-center min-h-full p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-xl font-bold mb-4">Adicionar Feriado</h3>
-
-            <form th:action="@{/banco_de_horas/dashboard/administrador/criar/feriado}" method="POST">
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+                <h3 class="text-xl font-bold">Adicionar Feriado</h3>
+                <button onclick="toggleHolidayModal(false)" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="addHolidayForm" th:action="@{/banco_de_horas/dashboard/administrador/criar/feriado}" method="POST">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <div class="mb-4">
                     <label class="block mb-2">Data:</label>
-                    <input type="date" name="date" class="w-full border p-2 rounded" required>
+                    <input type="date" id="holidayDate" name="date" class="w-full border p-2 rounded" required>
                 </div>
-
                 <div class="mb-4">
                     <label class="block mb-2">Descrição:</label>
-                    <input type="text" name="description" placeholder="Ex: Natal, Ano Novo..."
+                    <input type="text" id="holidayDescription" name="description"
+                           placeholder="Ex: Natal, Ano Novo..."
                            class="w-full border p-2 rounded" required>
                 </div>
-
                 <div class="flex gap-2">
                     <button type="button" onclick="toggleHolidayModal(false)"
                             class="bg-gray-500 text-white px-4 py-2 rounded">
@@ -366,26 +322,30 @@
     </div>
 </div>
 
-<!-- Modal para Editar Feriado -->
+<!-- Modal Editar Feriado -->
 <div id="editHolidayModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50">
     <div class="flex items-center justify-center min-h-full p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-xl font-bold mb-4">Editar Feriado</h3>
-
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+                <h3 class="text-xl font-bold">Editar Feriado</h3>
+                <button onclick="toggleEditHolidayModal(false)" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
             <form id="editHolidayForm" th:action="@{/banco_de_horas/dashboard/editar/feriado}" method="POST">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <input type="hidden" id="editHolidayId" name="id"/>
-
                 <div class="mb-4">
                     <label class="block mb-2">Data:</label>
                     <input type="date" id="editHolidayDate" name="date" class="w-full border p-2 rounded" required>
                 </div>
-
                 <div class="mb-4">
                     <label class="block mb-2">Descrição:</label>
-                    <input type="text" id="editHolidayDescription" name="description" class="w-full border p-2 rounded"
-                           required>
+                    <input type="text" id="editHolidayDescription" name="description"
+                           class="w-full border p-2 rounded" required>
                 </div>
-
                 <div class="flex gap-2">
                     <button type="button" onclick="toggleEditHolidayModal(false)"
                             class="bg-gray-500 text-white px-4 py-2 rounded">
@@ -400,202 +360,8 @@
     </div>
 </div>
 
-<script>
-    const searchInput = document.getElementById('searchFiscal');
-    const fiscalItems = document.querySelectorAll('.fiscal-item');
-    const noResults = document.getElementById('noResults');
-
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase().trim();
-            let hasResults = false;
-
-            fiscalItems.forEach(item => {
-                const fiscalName = item.getAttribute('data-name').toLowerCase();
-
-                // Busca apenas no início do nome (ou início de cada palavra)
-                const words = fiscalName.split(' ');
-                const matchesStart = words.some(word => word.startsWith(searchTerm));
-
-                if (matchesStart) {
-                    item.style.display = 'flex';
-                    hasResults = true;
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-
-            // Mostrar/ocultar mensagem de "sem resultados"
-            if (hasResults || searchTerm === '') {
-                noResults.classList.add('hidden');
-            } else {
-                noResults.classList.remove('hidden');
-            }
-        });
-    }
-
-    function toggleModal(show) {
-        const modal = document.getElementById('addFiscalModal');
-        const body = document.body;
-
-        if (show) {
-            modal.classList.remove('hidden');
-            body.classList.add('overflow-hidden');
-            document.getElementById('fullName').focus();
-        } else {
-            modal.classList.add('hidden');
-            body.classList.remove('overflow-hidden');
-            document.getElementById('addFiscalForm').reset();
-        }
-    }
-
-    // ADICIONAR: Função para modal de feriados
-    function toggleHolidayModal(show) {
-        const modal = document.getElementById('addHolidayModal');
-        const body = document.body;
-
-        if (show) {
-            modal.classList.remove('hidden');
-            body.classList.add('overflow-hidden');
-            document.getElementById('holidayDate').focus();
-        } else {
-            modal.classList.add('hidden');
-            body.classList.remove('overflow-hidden');
-            document.getElementById('addHolidayForm').reset();
-        }
-    }
-
-    function toggleEditHolidayModal(show) {
-        const modal = document.getElementById('editHolidayModal');
-        const body = document.body;
-
-        if (show) {
-            modal.classList.remove('hidden');
-            body.classList.add('overflow-hidden');
-            document.getElementById('editHolidayDate').focus();
-        } else {
-            modal.classList.add('hidden');
-            body.classList.remove('overflow-hidden');
-            document.getElementById('editHolidayForm').reset();
-        }
-    }
-
-    // ADICIONAR: Event listener para capturar cliques nos botões de editar
-    document.addEventListener('click', function (event) {
-        // Verifica se o clique foi em um botão de editar feriado
-        const editButton = event.target.closest('button[data-id]');
-        if (editButton && editButton.hasAttribute('data-date')) {
-            const holidayId = editButton.getAttribute('data-id');
-            const holidayDate = editButton.getAttribute('data-date');
-            const holidayDescription = editButton.getAttribute('data-description');
-
-            // Preenche os campos do modal de edição
-            document.getElementById('editHolidayId').value = holidayId;
-            document.getElementById('editHolidayDate').value = holidayDate;
-            document.getElementById('editHolidayDescription').value = holidayDescription;
-
-            // Abre o modal de edição
-            toggleEditHolidayModal(true);
-        }
-    });
-
-    // Fechar modal ao clicar fora dele
-    document.getElementById('addFiscalModal').addEventListener('click', function (event) {
-        if (event.target === this) {
-            toggleModal(false);
-        }
-    });
-
-    // Fechar modal ao clicar fora dele
-    document.getElementById('addFiscalModal').addEventListener('click', function (event) {
-        if (event.target === this) {
-            toggleModal(false);
-        }
-    });
-
-    // Modal de deletar
-function toggleDeleteModal(show) {
-    const modal = document.getElementById('deleteFiscalModal');
-    modal.classList.toggle('hidden', !show);
-    if (!show) {
-        document.getElementById('registrationDelete').value = '';
-    }
-}
-
-// Fecha o modal clicando fora dele
-document.getElementById('deleteFiscalModal').addEventListener('click', function(e) {
-    if (e.target === this) toggleDeleteModal(false);
-});
-
-    // ADICIONAR: Fechar modal de feriados ao clicar fora
-    document.getElementById('addHolidayModal').addEventListener('click', function (event) {
-        if (event.target === this) {
-            toggleHolidayModal(false);
-        }
-    });
-
-    // Validação do formulário de fiscal
-    document.getElementById('addFiscalForm').addEventListener('submit', function (event) {
-        const fullName = document.getElementById('fullName').value.trim();
-        const registration = document.getElementById('registration').value.trim();
-        const userType = document.getElementById('userType').value;
-
-        if (!fullName || !registration || !userType) {
-            event.preventDefault();
-            alert('Por favor, preencha todos os campos obrigatórios.');
-            return;
-        }
-
-        if (fullName.length < 2) {
-            event.preventDefault();
-            alert('Nome completo deve ter pelo menos 2 caracteres.');
-            return;
-        }
-    });
-
-    // ADICIONAR: Validação do formulário de feriados
-    document.getElementById('addHolidayForm').addEventListener('submit', function (event) {
-        const date = document.getElementById('holidayDate').value;
-        const description = document.getElementById('holidayDescription').value.trim();
-
-        if (!date || !description) {
-            event.preventDefault();
-            alert('Por favor, preencha todos os campos obrigatórios.');
-            return;
-        }
-
-        if (description.length < 3) {
-            event.preventDefault();
-            alert('Descrição deve ter pelo menos 3 caracteres.');
-            return;
-        }
-    });
-
-    // Gerenciar estado ativo das abas usando apenas Tailwind
-    document.addEventListener('DOMContentLoaded', function () {
-        const activeTab = document.querySelector('.tab-button');
-        if (activeTab) {
-            activeTab.classList.add('bg-white', 'text-blue-600', 'border-b-2', 'border-blue-600', 'font-semibold');
-        }
-    });
-
-    function formatRegistration(input) {
-        // Remove tudo que não é número
-        let value = input.value.replace(/\D/g, '');
-
-        // Limita a 6 dígitos
-        if (value.length > 6) {
-            value = value.substring(0, 6);
-        }
-
-        // Adiciona o hífen após o 5º dígito
-        if (value.length > 5) {
-            value = value.substring(0, 5) + '-' + value.substring(5);
-        }
-
-        input.value = value;
-    }
-</script>
+<script th:src="@{/js/utils.js}"></script>
+<script th:src="@{/js/managerPage.js}"></script>
 
 </body>
 </html>
