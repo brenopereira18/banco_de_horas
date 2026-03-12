@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,23 +22,21 @@
         </div>
 
         <div class="flex items-center space-x-4">
+            <button th:if="${loggedRegistration == fiscal.registration}" onclick="openProfileModal()" class="px-4 py-2 text-sm border border-gray-300 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors duration-200">
+                Alterar dados
+            </button>
+
             <!-- Botão Voltar -->
             <a th:if="${isAdmin}" href="/banco_de_horas/dashboard/administrador"
-               class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold transition-colors duration-200">
+               class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm transition-colors duration-200">
                 <img th:src="@{/images/arrow-left.svg}" alt="Relógio" class="h-4 w-4"/>
                 <span>Voltar</span>
             </a>
 
-            <button th:if="${!isAdmin}"
-                    onclick="openPasswordModal()"
-                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition">
-                Alterar senha
-            </button>
-
             <!-- Botão Sair -->
             <form th:action="@{/banco_de_horas/dashboard/logout}" method="post">
                 <button type="submit"
-                        class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold transition-colors duration-200">
+                        class="flex items-center space-x-2 px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm transition-colors duration-200 border border-gray-300">
                     <img th:src="@{/images/arrow-right.svg}" alt="Sair" class="h-4 w-4"/>
                     <span>Sair</span>
                 </button>
@@ -46,46 +44,106 @@
         </div>
     </header>
 
-    <!-- Modal Alterar Senha -->
-    <div id="passwordModal"
-         class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center">
+    <div id="profileModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
 
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-sm p-6">
-            <h2 class="text-base font-semibold text-gray-800 mb-4">
-                Alterar senha
-            </h2>
+            <!-- Cabeçalho -->
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Alterar dados</h3>
+                <button onclick="closeProfileModal()"
+                        class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
 
-            <form th:action="@{/banco_de_horas/dashboard/alterar-senha}" method="post" class="space-y-4">
-                <div>
-                    <label class="block text-sm text-gray-600 mb-1">
-                        Nova senha
-                    </label>
-                    <input
-                            type="password"
-                            name="password"
-                            required
-                            minlength="6"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500"
-                            placeholder="Digite a nova senha"
-                    />
-                </div>
+            <!-- Select -->
+            <div class="mb-5">
+                <label class="block text-sm text-gray-600 mb-1">O que deseja alterar?</label>
+                <select id="profileOption" onchange="toggleProfileFields()"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700
+                           focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <option value="">Selecione uma opção</option>
+                    <option value="password">Senha</option>
+                    <option value="email">E-mail</option>
+                </select>
+            </div>
 
-                <div class="flex justify-end gap-2">
-                    <button
-                            type="button"
-                            onclick="closePasswordModal()"
-                            class="px-3 py-1.5 text-sm bg-gray-200 rounded-md hover:bg-gray-300">
-                        Cancelar
-                    </button>
+            <!-- Campos de senha -->
+            <div id="passwordFields" class="hidden">
+                <form th:action="@{/banco_de_horas/dashboard/alterar-senha}" method="post" class="space-y-4">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-                    <button
-                            type="submit"
-                            class="px-3 py-1.5 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700">
-                        Salvar
-                    </button>
-                </div>
-            </form>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Nova senha</label>
+                        <input type="password" name="password" minlength="7"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md
+                                  focus:outline-none focus:ring-2 focus:ring-orange-500"
+                               placeholder="Digite a nova senha"/>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Mínimo 7 caracteres.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Confirmar nova senha</label>
+                        <input type="password" name="passwordConfirmation" minlength="7"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md
+                                  focus:outline-none focus:ring-2 focus:ring-orange-500"
+                               placeholder="Repita a nova senha"/>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" onclick="closeProfileModal()"
+                                class="px-3 py-1.5 text-sm bg-gray-200 rounded-md hover:bg-gray-300">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                                class="px-3 py-1.5 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700">
+                            Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Campos de e-mail -->
+            <div id="emailFields" class="hidden">
+                <form th:action="@{/banco_de_horas/dashboard/alterar-email}" method="post" class="space-y-4">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Novo e-mail</label>
+                        <input type="email" name="email"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md
+                                  focus:outline-none focus:ring-2 focus:ring-orange-500"
+                               placeholder="Digite o novo e-mail"/>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" onclick="closeProfileModal()"
+                                class="px-3 py-1.5 text-sm bg-gray-200 rounded-md hover:bg-gray-300">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                                class="px-3 py-1.5 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700">
+                            Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
         </div>
+    </div>
+
+    <div th:if="${successMessage}"
+         class="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm">
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <div th:if="${errorMessage}"
+         class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+        <span th:text="${errorMessage}"></span>
     </div>
 
     <!-- Cards Principais (3 colunas) -->
@@ -262,23 +320,23 @@
                             <!-- Datas -->
                             <p class="text-sm text-gray-500"
                                th:with="hasEnd=${item.endDate != null},
-            end=${hasEnd ? item.endDate : item.startDate},
-            onlyHours=${item.endDate == null && item.fractionalHours != null}">
+                               end=${hasEnd ? item.endDate : item.startDate},
+                                onlyHours=${item.endDate == null && item.fractionalHours != null}">
 
                                 <!-- Datas -->
                                 <span th:if="${item.startDate.equals(end)}"
                                       th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')}">
-    </span>
+                                </span>
 
                                 <span th:if="${!item.startDate.equals(end)}"
                                       th:text="${#temporals.format(item.startDate, 'dd/MM/yyyy')
-            + ' até ' + #temporals.format(end, 'dd/MM/yyyy')}">
-    </span>
+                                        + ' até ' + #temporals.format(end, 'dd/MM/yyyy')}">
+                                </span>
 
                                 <!-- Dias úteis (só mostra se NÃO for apenas horas) -->
                                 <span th:if="${item.businessDays > 0 && !onlyHours}">
-        • <span th:text="${item.businessDays == 1 ? '1 dia útil' : item.businessDays + ' dias úteis'}"></span>
-    </span>
+                                    • <span th:text="${item.businessDays == 1 ? '1 dia útil' : item.businessDays + ' dias úteis'}"></span>
+                                </span>
                             </p>
 
                             <div class="flex items-center space-x-4">
@@ -858,14 +916,33 @@
         }
     }
 
-
-    function openPasswordModal() {
-        document.getElementById('passwordModal').classList.remove('hidden');
+    function openProfileModal() {
+        document.getElementById('profileModal').classList.remove('hidden');
     }
 
-    function closePasswordModal() {
-        document.getElementById('passwordModal').classList.add('hidden');
+    function closeProfileModal() {
+        document.getElementById('profileModal').classList.add('hidden');
+        document.getElementById('profileOption').value = '';
+        document.getElementById('passwordFields').classList.add('hidden');
+        document.getElementById('emailFields').classList.add('hidden');
     }
+
+    function toggleProfileFields() {
+        const option = document.getElementById('profileOption').value;
+        document.getElementById('passwordFields').classList.add('hidden');
+        document.getElementById('emailFields').classList.add('hidden');
+
+        if (option === 'password')
+            document.getElementById('passwordFields').classList.remove('hidden');
+        else if (option === 'email')
+            document.getElementById('emailFields').classList.remove('hidden');
+    }
+
+    // Fecha clicando fora do modal
+    document.getElementById('profileModal').addEventListener('click', function(e) {
+        if (e.target === this) closeProfileModal()
+    });
+
 
 </script>
 </body>
