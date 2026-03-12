@@ -3,10 +3,10 @@ spring:
         name: banco_de_horas
 
     datasource:
-        url: jdbc:***REMOVED***ql://localhost:5432/***REMOVED***
-        username: ***REMOVED***
-        password: ***REMOVED***
-        driver-class-name: org.***REMOVED***ql.Driver
+        url: jdbc:postgresql://localhost:5432/annual_leave
+        username: postgres
+        password: 2001
+        driver-class-name: org.postgresql.Driver
     jpa:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
@@ -47,8 +47,8 @@ spring:
     mail:
         host: smtp.gmail.com
         port: 587
-        username: ***REMOVED***
-        password: ***REMOVED***
+        username: brenopereirabetti@gmail.com
+        password: qxct jzzy omqq orws
         properties:
             mail:
                 smtp:
