@@ -47,8 +47,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: brenopereirabetti@gmail.com
-    password: bpb181001
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -57,7 +57,7 @@ spring:
             enable: true
 
 app:
-  base-url: https://seudominio.com.br/banco_de_horas
+  base-url: ${APP_BASE_URL}
 
 server:
   port: 8080
