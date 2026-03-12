@@ -1,6 +1,7 @@
 package com.banco_de_horas.banco_de_horas.controller;
 
 import com.banco_de_horas.banco_de_horas.exceptions.CooldownActiveException;
+import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
 import com.banco_de_horas.banco_de_horas.holiday.dto.HolidayRequestDTO;
 import com.banco_de_horas.banco_de_horas.holiday.entity.HolidayEntity;
 import com.banco_de_horas.banco_de_horas.holiday.service.HolidayService;
@@ -18,6 +19,7 @@ import com.banco_de_horas.banco_de_horas.work.dto.MonthlyWorkItemDTO;
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.service.WorkService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -36,6 +38,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/banco_de_horas/dashboard")
 public class DashboardController {
@@ -115,7 +118,7 @@ public class DashboardController {
             model.addAttribute("hoursUsed", TimeFormatUtils.formatHours(hoursUsed));
             model.addAttribute("generatedHours", TimeFormatUtils.formatHours(generatedHours));
             model.addAttribute("fiscal", tax);
-            model.addAttribute("userName", "Eduardo");
+            model.addAttribute("loggedRegistration", auth.getName());
 
             return "dashboardTax";
 
@@ -207,21 +210,21 @@ public class DashboardController {
         Authentication authentication,
         RedirectAttributes redirectAttributes) {
 
+        TaxEntity user = (TaxEntity) authentication.getPrincipal();
+
+        String validationError = taxService.validateUpdateProfile(user.getId(), dto);
+        if (validationError != null) {
+            redirectAttributes.addFlashAttribute("errorMessage", validationError);
+            return "redirect:/banco_de_horas/dashboard/fiscal/" + user.getId();
+        }
+
         try {
-            TaxEntity user = (TaxEntity) authentication.getPrincipal();
-
-            taxService.updateProfile(
-                user.getId(),
-                dto
-            );
-
-            redirectAttributes.addFlashAttribute("successMessage",
-                "Senha alterada com sucesso!");
-
-        } catch (IllegalArgumentException e) {
+            taxService.updateProfile(user.getId(), dto);
+            redirectAttributes.addFlashAttribute("successMessage", "Senha alterada com sucesso!");
+        } catch (ResourceNotFoundException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
-        TaxEntity user = (TaxEntity) authentication.getPrincipal();
+
         return "redirect:/banco_de_horas/dashboard/fiscal/" + user.getId();
     }
 
@@ -364,6 +367,18 @@ public class DashboardController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao cadastrar fiscal: " + e.getMessage());
+        }
+        return "redirect:/banco_de_horas/dashboard/administrador";
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PostMapping("/administrador/deletar/fiscal")
+    public String delete(@RequestParam String registration, RedirectAttributes redirectAttrs) {
+        try {
+            taxService.delete(registration);
+            redirectAttrs.addFlashAttribute("sucesso", "Fiscal removido com sucesso.");
+        } catch (ResourceNotFoundException e) {
+            redirectAttrs.addFlashAttribute("erro", "Fiscal não encontrado.");
         }
         return "redirect:/banco_de_horas/dashboard/administrador";
     }
