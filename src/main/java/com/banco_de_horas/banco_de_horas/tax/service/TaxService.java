@@ -7,6 +7,7 @@ import com.banco_de_horas.banco_de_horas.tax.dto.TaxRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxResponseDTO;
 import com.banco_de_horas.banco_de_horas.tax.dto.UpdateProfileRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.entity.TaxEntity;
+import com.banco_de_horas.banco_de_horas.tax.repository.PasswordResetTokenRepository;
 import com.banco_de_horas.banco_de_horas.tax.repository.TaxRepository;
 import com.banco_de_horas.banco_de_horas.utils.TimeFormatUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,9 @@ public class TaxService {
 
     @Autowired
     private TaxRepository taxRepository;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -58,21 +62,37 @@ public class TaxService {
             }).toList();
     }
 
+    public String validateUpdateProfile(Long id, UpdateProfileRequestDTO dto) {
+        TaxEntity tax = taxRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+
+        if (dto.email() != null && !dto.email().isBlank()) {
+            if (taxRepository.findByEmail(dto.email()).isPresent())
+                return "Este e-mail já está em uso.";
+        }
+
+        if (dto.password() != null && !dto.password().isBlank()) {
+            if (!dto.password().equals(dto.passwordConfirmation()))
+                return "As senhas não coincidem.";
+            if (dto.password().length() < 7)
+                return "A senha deve ter pelo menos 7 caracteres.";
+            if (passwordEncoder.matches(dto.password(), tax.getPassword()))
+                return "A nova senha deve ser diferente da senha atual.";
+        }
+
+        return null;
+    }
+
     public void updateProfile(Long id, UpdateProfileRequestDTO dto) {
         TaxEntity tax = taxRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
-        // Validar se nova senha é diferente da atual
-        if (passwordEncoder.matches(dto.password(), tax.getPassword())) {
-            throw new IllegalArgumentException("A nova senha deve ser diferente da senha atual");
-        }
+        if (dto.email() != null && !dto.email().isBlank())
+            tax.setEmail(dto.email());
 
-        // Validar força da senha (mínimo 6 caracteres, por exemplo)
-        if (dto.password().length() < 6) {
-            throw new IllegalArgumentException("A senha deve ter no mínimo 6 caracteres");
-        }
+        if (dto.password() != null && !dto.password().isBlank())
+            tax.setPassword(passwordEncoder.encode(dto.password()));
 
-        tax.setPassword(passwordEncoder.encode(dto.password()));
         taxRepository.save(tax);
     }
 
@@ -86,9 +106,12 @@ public class TaxService {
         return taxRepository.save(existing);
     }
 
-    public void delete(Long id) {
-        TaxEntity existing = taxRepository.findById(id)
+    public void delete(String registration) {
+        TaxEntity existing = taxRepository.findByRegistration(registration)
             .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
+
+        passwordResetTokenRepository.findByTaxEntity(existing)
+            .ifPresent(passwordResetTokenRepository::delete);
 
         taxRepository.delete(existing);
     }
