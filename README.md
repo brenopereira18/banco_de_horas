@@ -165,7 +165,7 @@ docker-compose -f docker-compose-dev.yml up -d
 ### 5. Execute a aplicação
 
 ```bash
-export $(grep -v '^#' .env.dev | xargs) && ./mvnw spring-boot:run -Dspring.profiles.active=dev
+export $(grep -v '^#' .env | xargs) && ./mvnw spring-boot:run -Dspring.profiles.active=dev
 ```
 
 ### 6. Acesse no navegador
