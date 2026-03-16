@@ -14,7 +14,7 @@
     <!-- Header -->
     <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard - <span th:text="${user.userType}">ADMINISTRADOR</span></h1>
+            <h1 class="sm:text-2xl text-lg font-bold text-gray-900">Dashboard - <span th:text="${user.userType}">ADMINISTRADOR</span></h1>
             <p class="text-lg text-gray-600 mt-1">Bem-vindo, <span th:text="${user.fullName}">Eduardo</span></p>
         </div>
         <div>
@@ -71,24 +71,41 @@
             </div>
         </div>
 
-        <div id="fiscalList" class="max-h-96 overflow-y-auto mr-1">
+        <div id="fiscalList" class="max-h-96 overflow-x-auto overflow-y-auto mr-1">
             <div th:each="fiscal : ${fiscais}"
-                 class="fiscal-item flex items-center justify-between p-2 border-b border-gray-150 last:border-b-0 hover:bg-gray-100 rounded-md transition-colors duration-150 overflow-x-auto whitespace-nowrap sm:overflow-visible"
-                 th:data-name="${fiscal.fullName()}">
+                 class="grid grid-cols-[minmax(200px,1fr)_auto] items-center p-2 border-b border-gray-150 hover:bg-gray-100 rounded-md">
 
-                <div class="flex-1 whitespace-nowrap">
-                    <p class="font-semibold text-gray-700" th:text="${fiscal.fullName()}"></p>
+                <!-- Dados do Fiscal -->
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-gray-700 truncate"
+                       th:text="${fiscal.fullName()}">
+                        Nome Completo do Fiscal
+                    </p>
+
                     <p class="text-sm text-green-600">
-                        Saldo de Horas: <span class="font-medium" th:text="${fiscal.balanceOfHours()}"></span>
+                        Saldo de Horas:
+                        <span class="font-medium"
+                              th:text="${fiscal.balanceOfHours()}">
+                            0,00
+                        </span>
                     </p>
                 </div>
 
-                <div class="flex pl-14 sm:pl-0 items-center gap-2">
+                <!-- Botões -->
+                <div class="flex items-center gap-2 flex-nowrap shrink-0 whitespace-nowrap">
+
                     <form th:action="@{/banco_de_horas/dashboard/administrador/fiscal/{id}/add-hours(id=${fiscal.id()})}"
-                          method="POST" class="flex items-center gap-1">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <input type="number" step="0.01" min="0" name="hours" placeholder="+ horas"
-                               class="w-20 text-xs border rounded px-2 py-1" required>
+                          method="POST"
+                          class="flex items-center gap-1">
+
+                        <input type="number"
+                               step="0.01"
+                               min="0"
+                               name="hours"
+                               placeholder="+ horas"
+                               class="w-20 text-xs border rounded px-2 py-1"
+                               required>
+
                         <button type="submit"
                                 class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200">
                             +
@@ -97,7 +114,6 @@
 
                     <form th:action="@{/banco_de_horas/dashboard/administrador/fiscal/{id}/revert-hours(id=${fiscal.id()})}"
                           method="post">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <button type="submit"
                                 th:title="'Última adição: ' + (${fiscal.lastAddedHours} != null ? ${fiscal.lastAddedHours} : 0)"
                                 class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">
@@ -109,6 +125,7 @@
                        class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">
                         Ver Detalhes
                     </a>
+
                 </div>
             </div>
         </div>
