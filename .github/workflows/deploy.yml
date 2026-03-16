@@ -53,4 +53,7 @@ jobs:
                     -e DB_NAME=${{ secrets.DB_NAME }} \
                     -e DB_USER=${{ secrets.DB_USER }} \
                     -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                    -e APP_BASE_URL=${{ secrets.APP_BASE_URL }} \
+                    -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
+                    -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
                     ${{ secrets.DOCKER_USERNAME }}/banco_de_horas:latest
