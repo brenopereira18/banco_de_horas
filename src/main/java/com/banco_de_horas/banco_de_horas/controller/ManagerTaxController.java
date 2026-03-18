@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 
 @Slf4j
 @Controller
-@RequestMapping("/banco_de_horas/dashboard/administrador")
+@RequestMapping("/controle_de_folgas/dashboard/administrador")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMINISTRADOR')")
 public class ManagerTaxController {
@@ -34,7 +34,7 @@ public class ManagerTaxController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao cadastrar fiscal: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/administrador";
+        return "redirect:/controle_de_folgas/dashboard/administrador";
     }
 
     @PostMapping("/deletar/fiscal")
@@ -48,7 +48,7 @@ public class ManagerTaxController {
         } catch (ResourceNotFoundException e) {
             redirectAttrs.addFlashAttribute("errorMessage", "Fiscal não encontrado.");
         }
-        return "redirect:/banco_de_horas/dashboard/administrador";
+        return "redirect:/controle_de_folgas/dashboard/administrador";
     }
 
     @PostMapping("/fiscal/{id}/add-hours")
@@ -57,12 +57,12 @@ public class ManagerTaxController {
         @RequestParam BigDecimal hours) {
 
         taxService.addHours(id, hours);
-        return "redirect:/banco_de_horas/dashboard/administrador";
+        return "redirect:/controle_de_folgas/dashboard/administrador";
     }
 
     @PostMapping("/fiscal/{id}/revert-hours")
     public String revertHours(@PathVariable Long id) {
         taxService.revertLastAddedHours(id);
-        return "redirect:/banco_de_horas/dashboard/administrador";
+        return "redirect:/controle_de_folgas/dashboard/administrador";
     }
 }

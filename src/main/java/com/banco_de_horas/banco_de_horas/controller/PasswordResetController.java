@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
 @Controller
-@RequestMapping("/banco_de_horas/dashboard")
+@RequestMapping("/controle_de_folgas/dashboard")
 @RequiredArgsConstructor
 public class PasswordResetController {
 
@@ -37,12 +37,12 @@ public class PasswordResetController {
         } catch (CooldownActiveException e) {
             redirectAttrs.addFlashAttribute("errorMessage",
                 "Você já solicitou um link recentemente. Aguarde 5 minutos.");
-            return "redirect:/banco_de_horas/dashboard/esqueci-senha";
+            return "redirect:/controle_de_folgas/dashboard/esqueci-senha";
         }
 
         redirectAttrs.addFlashAttribute("successMessage",
             "Se este e-mail estiver cadastrado, você receberá as instruções em breve.");
-        return "redirect:/banco_de_horas/dashboard/esqueci-senha";
+        return "redirect:/controle_de_folgas/dashboard/esqueci-senha";
     }
 
     @GetMapping("/reset-senha")
@@ -69,18 +69,18 @@ public class PasswordResetController {
         String validationError = passwordResetTokenService.validatePassword(newPassword, passwordConfirmation);
         if (validationError != null) {
             redirectAttrs.addFlashAttribute("errorMessage", validationError);
-            return "redirect:/banco_de_horas/dashboard/reset-senha?token=" + token;
+            return "redirect:/controle_de_folgas/dashboard/reset-senha?token=" + token;
         }
 
         if (passwordResetTokenService.resetPassword(token, newPassword)) {
             redirectAttrs.addFlashAttribute("successMessage",
                 "Senha redefinida com sucesso! Faça login com sua nova senha.");
-            return "redirect:/banco_de_horas/dashboard/login";
+            return "redirect:/controle_de_folgas/dashboard/login";
         }
 
         redirectAttrs.addFlashAttribute("errorMessage",
             "Link inválido ou expirado. Solicite um novo link.");
-        return "redirect:/banco_de_horas/dashboard/esqueci-senha";
+        return "redirect:/controle_de_folgas/dashboard/esqueci-senha";
     }
 
     // Respeita proxy reverso (nginx, etc.)

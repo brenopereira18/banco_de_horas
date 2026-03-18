@@ -18,7 +18,7 @@ import java.time.LocalDate;
 
 @Slf4j
 @Controller
-@RequestMapping("/banco_de_horas/dashboard/fiscal")
+@RequestMapping("/controle_de_folgas/dashboard/fiscal")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMINISTRADOR')")
 public class TimeOffController {
@@ -42,7 +42,7 @@ public class TimeOffController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao registrar folga: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
+        return "redirect:/controle_de_folgas/dashboard/fiscal/" + taxId;
     }
 
     @PostMapping("/{taxId}/editar/folga")
@@ -63,7 +63,7 @@ public class TimeOffController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao atualizar folga: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
+        return "redirect:/controle_de_folgas/dashboard/fiscal/" + taxId;
     }
 
     @PostMapping("/excluir/folga/{id}")
@@ -79,6 +79,6 @@ public class TimeOffController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao excluir folga: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
+        return "redirect:/controle_de_folgas/dashboard/fiscal/" + taxId;
     }
 }

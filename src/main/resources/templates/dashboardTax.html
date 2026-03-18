@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Banco de Horas</title>
+    <title>Dashboard - Controle de Folgas</title>
     <link rel="stylesheet" th:href="@{/css/output.css}">
 </head>
 <body class="bg-gray-100 min-h-screen text-gray-800 font-sans h-full">
@@ -28,13 +28,13 @@
                 Alterar dados
             </button>
 
-            <a th:if="${isAdmin}" href="/banco_de_horas/dashboard/administrador"
+            <a th:if="${isAdmin}" href="/controle_de_folgas/dashboard/administrador"
                class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm transition-colors duration-200">
                 <img th:src="@{/images/arrow-left.svg}" alt="Voltar" class="h-4 w-4"/>
                 <span>Voltar</span>
             </a>
 
-            <form th:action="@{/banco_de_horas/dashboard/logout}" method="post">
+            <form th:action="@{/controle_de_folgas/dashboard/logout}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button type="submit"
                         class="flex items-center space-x-2 px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm transition-colors duration-200 border border-gray-300">
@@ -72,7 +72,7 @@
 
             <!-- Campos de senha -->
             <div id="passwordFields" class="hidden">
-                <form th:action="@{/banco_de_horas/dashboard/alterar-senha}" method="post" class="space-y-4">
+                <form th:action="@{/controle_de_folgas/dashboard/alterar-senha}" method="post" class="space-y-4">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Nova senha</label>
@@ -104,7 +104,7 @@
 
             <!-- Campos de e-mail -->
             <div id="emailFields" class="hidden">
-                <form th:action="@{/banco_de_horas/dashboard/alterar-email}" method="post" class="space-y-4">
+                <form th:action="@{/controle_de_folgas/dashboard/alterar-email}" method="post" class="space-y-4">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Novo e-mail</label>
@@ -225,7 +225,7 @@
                                     onclick="openEditModal(this)">
                                 <img th:src="@{/images/edit.svg}" class="h-4 w-4"/>
                             </button>
-                            <form th:action="@{/banco_de_horas/dashboard/fiscal/excluir/servico/{id}(id=${work.id})}"
+                            <form th:action="@{/controle_de_folgas/dashboard/fiscal/excluir/servico/{id}(id=${work.id})}"
                                   method="POST" class="inline"
                                   onsubmit="return confirm('Tem certeza que deseja excluir este serviço? Esta ação é irreversível.')">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -245,7 +245,7 @@
             <div th:if="${totalPages > 1}"
                  class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                 <a th:if="${hasPrevious}"
-                   th:href="@{/banco_de_horas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage - 1})}"
+                   th:href="@{/controle_de_folgas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage - 1})}"
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                     ← Anterior
                 </a>
@@ -256,7 +256,7 @@
                 </span>
 
                 <a th:if="${hasNext}"
-                   th:href="@{/banco_de_horas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage + 1})}"
+                   th:href="@{/controle_de_folgas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage + 1})}"
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                     Próximo →
                 </a>
@@ -311,7 +311,7 @@
                                     onclick="openEditTimeOffModal(this)">
                                 <img th:src="@{/images/edit.svg}" class="h-4 w-4"/>
                             </button>
-                            <form th:action="@{/banco_de_horas/dashboard/fiscal/excluir/folga/{id}(id=${item.id})}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta folga? Esta ação é irreversível.')">
+                            <form th:action="@{/controle_de_folgas/dashboard/fiscal/excluir/folga/{id}(id=${item.id})}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta folga? Esta ação é irreversível.')">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                 <input type="hidden" name="taxId" th:value="${fiscal.id}"/>
                                 <button type="submit"
@@ -329,7 +329,7 @@
             <div th:if="${timeOffTotalPages > 1}"
                  class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                 <a th:if="${timeOffHasPrevious}"
-                   th:href="@{/banco_de_horas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage}, timeOffPage=${timeOffCurrentPage - 1})}"
+                   th:href="@{/controle_de_folgas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage}, timeOffPage=${timeOffCurrentPage - 1})}"
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                     ← Anterior
                 </a>
@@ -340,7 +340,7 @@
                 </span>
 
                 <a th:if="${timeOffHasNext}"
-                   th:href="@{/banco_de_horas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage}, timeOffPage=${timeOffCurrentPage + 1})}"
+                   th:href="@{/controle_de_folgas/dashboard/fiscal/{taxId}(taxId=${fiscal.id}, page=${currentPage}, timeOffPage=${timeOffCurrentPage + 1})}"
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors duration-200">
                     Próximo →
                 </a>
@@ -361,7 +361,7 @@
                         </svg>
                     </button>
                 </div>
-                <form th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/timeoff(taxId=${fiscal.id})}"
+                <form th:action="@{/controle_de_folgas/dashboard/fiscal/{taxId}/timeoff(taxId=${fiscal.id})}"
                       method="POST" class="max-h-[480px] overflow-y-auto pr-2">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <div class="mb-4">
@@ -418,7 +418,7 @@
                     </button>
                 </div>
                 <form id="editTimeOffForm"
-                      th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/editar/folga(taxId=${fiscal.id})}"
+                      th:action="@{/controle_de_folgas/dashboard/fiscal/{taxId}/editar/folga(taxId=${fiscal.id})}"
                       method="POST" class="max-h-[480px] overflow-y-auto pr-2">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <input type="hidden" id="editTimeOffId" name="timeOffId"/>
@@ -494,7 +494,7 @@
                     + Adicionar serviço à lista
                 </button>
                 <ul id="serviceList" class="space-y-2 mb-4 text-sm max-h-[120px] overflow-y-auto"></ul>
-                <form th:action="@{/banco_de_horas/dashboard/fiscal/{id}/work/batch(id=${fiscal.id})}"
+                <form th:action="@{/controle_de_folgas/dashboard/fiscal/{id}/work/batch(id=${fiscal.id})}"
                       method="POST" onsubmit="prepareSubmit(event)">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <input type="hidden" name="servicesJson" id="servicesJson">
@@ -526,7 +526,7 @@
                     </button>
                 </div>
                 <form id="editServiceForm"
-                      th:action="@{/banco_de_horas/dashboard/fiscal/{taxId}/editar/servico(taxId=${fiscal.id})}"
+                      th:action="@{/controle_de_folgas/dashboard/fiscal/{taxId}/editar/servico(taxId=${fiscal.id})}"
                       method="POST">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <input type="hidden" id="editWorkId" name="workId"/>

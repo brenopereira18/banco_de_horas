@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Controller
-@RequestMapping("/banco_de_horas/dashboard")
+@RequestMapping("/controle_de_folgas/dashboard")
 @RequiredArgsConstructor
 public class DashboardController {
 

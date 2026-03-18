@@ -29,21 +29,21 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/banco_de_horas/dashboard/esqueci-senha").permitAll()
-                .requestMatchers("/banco_de_horas/dashboard/reset-senha").permitAll()
-                .requestMatchers("/banco_de_horas/dashboard/administrador/**").hasRole("ADMINISTRADOR")
+                .requestMatchers("/controle_de_folgas/dashboard/esqueci-senha").permitAll()
+                .requestMatchers("/controle_de_folgas/dashboard/reset-senha").permitAll()
+                .requestMatchers("/controle_de_folgas/dashboard/administrador/**").hasRole("ADMINISTRADOR")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                .loginPage("/banco_de_horas/dashboard/login")
+                .loginPage("/controle_de_folgas/dashboard/login")
                 .usernameParameter("registration")
                 .passwordParameter("password")
                 .successHandler(customAuthenticationSuccessHandler)
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/banco_de_horas/dashboard/logout")
-                .logoutSuccessUrl("/banco_de_horas/dashboard/login?logout\"")
+                .logoutUrl("/controle_de_folgas/dashboard/logout")
+                .logoutSuccessUrl("/controle_de_folgas/dashboard/login?logout\"")
                 .permitAll()
             );
 
