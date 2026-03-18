@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
 @Controller
-@RequestMapping("/banco_de_horas/dashboard")
+@RequestMapping("/controle_de_folgas/dashboard")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMINISTRADOR')")
 public class ManagerHolidayController {
@@ -31,7 +31,7 @@ public class ManagerHolidayController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao cadastrar feriado: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/administrador?tab=feriados";
+        return "redirect:/controle_de_folgas/dashboard/administrador?tab=feriados";
     }
 
     @PostMapping("/editar/feriado")
@@ -47,7 +47,7 @@ public class ManagerHolidayController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao atualizar feriado: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/administrador?tab=feriados";
+        return "redirect:/controle_de_folgas/dashboard/administrador?tab=feriados";
     }
 
     @PostMapping("/excluir/feriado/{id}")
@@ -62,6 +62,6 @@ public class ManagerHolidayController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao excluir feriado: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/administrador?tab=feriados";
+        return "redirect:/controle_de_folgas/dashboard/administrador?tab=feriados";
     }
 }

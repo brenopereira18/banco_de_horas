@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
 @Controller
-@RequestMapping("/banco_de_horas/dashboard")
+@RequestMapping("/controle_de_folgas/dashboard")
 @RequiredArgsConstructor
 public class ProfileController {
 
@@ -32,7 +32,7 @@ public class ProfileController {
         String validationError = taxService.validateUpdateProfile(user.getId(), dto);
         if (validationError != null) {
             redirectAttributes.addFlashAttribute("errorMessage", validationError);
-            return "redirect:/banco_de_horas/dashboard/fiscal/" + user.getId();
+            return "redirect:/controle_de_folgas/dashboard/fiscal/" + user.getId();
         }
 
         try {
@@ -42,7 +42,7 @@ public class ProfileController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + user.getId();
+        return "redirect:/controle_de_folgas/dashboard/fiscal/" + user.getId();
     }
 
     @PostMapping("/alterar-email")
@@ -56,7 +56,7 @@ public class ProfileController {
         String validationError = taxService.validateUpdateProfile(user.getId(), dto);
         if (validationError != null) {
             redirectAttributes.addFlashAttribute("errorMessage", validationError);
-            return "redirect:/banco_de_horas/dashboard/fiscal/" + user.getId();
+            return "redirect:/controle_de_folgas/dashboard/fiscal/" + user.getId();
         }
 
         try {
@@ -66,6 +66,6 @@ public class ProfileController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + user.getId();
+        return "redirect:/controle_de_folgas/dashboard/fiscal/" + user.getId();
     }
 }

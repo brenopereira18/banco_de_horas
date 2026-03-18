@@ -1,4 +1,4 @@
-package com.banco_de_horas.banco_de_horas;
+package com.banco_de_horas.banco_de_horas.controller;
 
 import com.banco_de_horas.banco_de_horas.work.dto.WorkRequestDTO;
 import com.banco_de_horas.banco_de_horas.work.service.WorkService;
@@ -20,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 @Controller
-@RequestMapping("/banco_de_horas/dashboard/fiscal")
+@RequestMapping("/controle_de_folgas/dashboard/fiscal")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMINISTRADOR')")
 public class WorkController {
@@ -45,7 +45,7 @@ public class WorkController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao cadastrar serviços: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
+        return "redirect:/controle_de_folgas/dashboard/fiscal/" + taxId;
     }
 
     @PostMapping("/{taxId}/editar/servico")
@@ -65,7 +65,7 @@ public class WorkController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao atualizar serviço: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
+        return "redirect:/controle_de_folgas/dashboard/fiscal/" + taxId;
     }
 
     @PostMapping("/excluir/servico/{id}")
@@ -81,6 +81,6 @@ public class WorkController {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "Erro ao excluir serviço: " + e.getMessage());
         }
-        return "redirect:/banco_de_horas/dashboard/fiscal/" + taxId;
+        return "redirect:/controle_de_folgas/dashboard/fiscal/" + taxId;
     }
 }

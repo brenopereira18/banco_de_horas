@@ -17,8 +17,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         TaxEntity user = (TaxEntity) authentication.getPrincipal();
 
         String redirectUrl = switch (user.getUserType()) {
-            case ADMINISTRADOR -> "/banco_de_horas/dashboard/administrador";
-            case FISCAL, SUPERVISOR -> "/banco_de_horas/dashboard/fiscal/" + user.getId();
+            case ADMINISTRADOR -> "/controle_de_folgas/dashboard/administrador";
+            case FISCAL, SUPERVISOR -> "/controle_de_folgas/dashboard/fiscal/" + user.getId();
         };
 
         response.sendRedirect(redirectUrl);
