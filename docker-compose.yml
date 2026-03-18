@@ -14,7 +14,7 @@ services:
 
     app:
         container_name: banco_horas_app
-        build: .
+        image: devbrenopereira/banco_de_horas:latest
         ports:
             - 8080:8080
         env_file:
