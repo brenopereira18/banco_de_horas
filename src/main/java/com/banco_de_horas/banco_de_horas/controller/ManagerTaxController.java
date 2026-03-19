@@ -1,6 +1,7 @@
 package com.banco_de_horas.banco_de_horas.controller;
 
 import com.banco_de_horas.banco_de_horas.exceptions.ResourceNotFoundException;
+import com.banco_de_horas.banco_de_horas.tax.dto.TaxManagementRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.dto.TaxRequestDTO;
 import com.banco_de_horas.banco_de_horas.tax.service.TaxService;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,22 @@ public class ManagerTaxController {
     @PostMapping("/fiscal/{id}/revert-hours")
     public String revertHours(@PathVariable Long id) {
         taxService.revertLastAddedHours(id);
+        return "redirect:/controle_de_folgas/dashboard/administrador";
+    }
+
+    @PostMapping("/fiscal/{id}/editar")
+    public String updateFiscal(
+        @PathVariable Long id,
+        @ModelAttribute TaxManagementRequestDTO dto,
+        RedirectAttributes redirectAttributes) {
+
+        try {
+            taxService.update(id, dto);
+            redirectAttributes.addFlashAttribute("successMessage", "Fiscal atualizado com sucesso!");
+        } catch (ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
         return "redirect:/controle_de_folgas/dashboard/administrador";
     }
 }
