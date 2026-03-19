@@ -151,7 +151,7 @@ public class PasswordResetTokenService {
     @Async
     public void sendEmailAsync(String email, String nome, String rawToken) {
         try {
-            String link = baseUrl + "/dashboard/reset-senha?token=" + rawToken;
+            String link = baseUrl + "/controle_de_folgas/dashboard/reset-senha?token=" + rawToken;
 
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setTo(email);
