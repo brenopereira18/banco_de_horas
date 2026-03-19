@@ -131,3 +131,50 @@ document.getElementById('addHolidayForm').addEventListener('submit', function (e
         alert('Descrição deve ter pelo menos 3 caracteres.');
     }
 });
+
+// Modal Editar Fiscal
+function openEditFiscalModal(button) {
+    const id = button.getAttribute('data-id');
+    const name = button.getAttribute('data-name');
+    const email = button.getAttribute('data-email');
+    const userType = button.getAttribute('data-usertype');
+
+    document.getElementById('editFiscalFullName').value = name;
+    document.getElementById('editFiscalEmail').value = email;
+    document.getElementById('editFiscalUserType').value = userType;
+
+    document.getElementById('editFiscalForm').action =
+        `/controle_de_folgas/dashboard/administrador/fiscal/${id}/editar`;
+
+    toggleEditFiscalModal(true);
+}
+
+function toggleEditFiscalModal(show) {
+    const modal = document.getElementById('editFiscalModal');
+    modal.classList.toggle('hidden', !show);
+    document.body.classList.toggle('overflow-hidden', show);
+
+    if (show) {
+        document.getElementById('editFiscalFullName').focus();
+    } else {
+        document.getElementById('editFiscalForm').reset();
+    }
+}
+
+// Fechar modal clicando fora
+document.getElementById('editFiscalModal').addEventListener('click', function (e) {
+    if (e.target === this) toggleEditFiscalModal(false);
+});
+
+// Validação formulário editar fiscal
+document.getElementById('editFiscalForm').addEventListener('submit', function (event) {
+    const fullName = document.getElementById('editFiscalFullName').value.trim();
+    const email = document.getElementById('editFiscalEmail').value.trim();
+    const userType = document.getElementById('editFiscalUserType').value;
+
+    if (!fullName || !email || !userType) {
+            event.preventDefault();
+            alert('Por favor, preencha todos os campos obrigatórios.');
+            return;
+   }
+});
