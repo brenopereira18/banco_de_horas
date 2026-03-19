@@ -55,8 +55,10 @@ public class TaxService {
             .map(tax -> new TaxResponseDTO(
                 tax.getId(),
                 tax.getFullName(),
+                tax.getEmail(),
                 TimeFormatUtils.formatHours(tax.getBalanceOfHours()),
-                tax.getLastAddedHours()
+                tax.getLastAddedHours(),
+                tax.getUserType()
             ))
             .toList();
     }
@@ -101,8 +103,9 @@ public class TaxService {
         TaxEntity existing = taxRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Fiscal não encontrado"));
 
-        existing.setFullName(dto.fullName());
+        existing.setEmail(dto.email());
         existing.setUserType(dto.userType());
+        existing.setFullName(dto.fullName());
 
         TaxEntity updated = taxRepository.save(existing);
         log.info("Fiscal atualizado | ID: {}", id);
