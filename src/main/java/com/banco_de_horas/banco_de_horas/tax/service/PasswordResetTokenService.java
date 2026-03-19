@@ -66,6 +66,7 @@ public class PasswordResetTokenService {
             }
             // Token antigo existe — deleta antes de criar novo para garantir uso único
             passwordResetTokenRepository.delete(existingToken);
+            passwordResetTokenRepository.flush();
         });
 
         String rawToken = UUID.randomUUID().toString().replace("-", "");
