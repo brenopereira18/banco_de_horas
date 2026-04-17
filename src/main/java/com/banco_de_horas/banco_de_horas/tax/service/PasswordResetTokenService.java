@@ -43,13 +43,14 @@ public class PasswordResetTokenService {
 
     @Transactional
     public void requestReset(String email, String ip) {
+        email = email.trim().toLowerCase();
 
         if (!consumeRateLimit(ip)) {
             log.warn("Limite de tentativas atingido | IP: {}", ip);
             return;
         }
 
-        Optional<TaxEntity> opt = taxRepository.findByEmail(email);
+        Optional<TaxEntity> opt = taxRepository.findByEmailIgnoreCase(email);
 
         if (opt.isEmpty()) {
             log.info("Redefinição solicitada para e-mail não cadastrado | IP: {}", ip);

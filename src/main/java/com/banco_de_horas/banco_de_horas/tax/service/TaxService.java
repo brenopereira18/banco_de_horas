@@ -34,10 +34,12 @@ public class TaxService {
             throw new EntityAlreadyExists("Já existe fiscal com essa matrícula");
         }
 
+        String email = dto.email().toLowerCase();
+
         TaxEntity tax = TaxEntity.builder()
             .fullName(dto.fullName())
             .registration(dto.registration())
-            .email(dto.email())
+            .email(email)
             .password(passwordEncoder.encode(dto.registration()))
             .userType(dto.userType())
             .balanceOfHours(BigDecimal.ZERO)
@@ -69,7 +71,7 @@ public class TaxService {
             .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         if (dto.email() != null && !dto.email().isBlank()) {
-            if (taxRepository.findByEmail(dto.email()).isPresent())
+            if (taxRepository.findByEmailIgnoreCase(dto.email()).isPresent())
                 return "Este e-mail já está em uso.";
         }
 
@@ -89,8 +91,10 @@ public class TaxService {
         TaxEntity tax = taxRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
-        if (dto.email() != null && !dto.email().isBlank())
-            tax.setEmail(dto.email());
+        if (dto.email() != null && !dto.email().isBlank()) {
+            String email = dto.email().toLowerCase();
+            tax.setEmail(email);
+        }
 
         if (dto.password() != null && !dto.password().isBlank())
             tax.setPassword(passwordEncoder.encode(dto.password()));
