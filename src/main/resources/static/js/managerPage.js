@@ -1,6 +1,5 @@
 // Busca de fiscais
 const searchInput = document.getElementById('searchFiscal');
-const fiscalItems = document.querySelectorAll('.fiscal-item');
 const noResults = document.getElementById('noResults');
 
 if (searchInput) {
@@ -8,20 +7,22 @@ if (searchInput) {
         const searchTerm = this.value.toLowerCase().trim();
         let hasResults = false;
 
-        fiscalItems.forEach(item => {
-            const fiscalName = item.getAttribute('data-name').toLowerCase();
-            const words = fiscalName.split(' ');
-            const matchesStart = words.some(word => word.startsWith(searchTerm));
+        const fiscalItems = document.querySelectorAll('.fiscal-item');
 
-            if (matchesStart) {
-                item.style.display = 'flex';
+        fiscalItems.forEach(item => {
+            const fiscalName = (item.getAttribute('data-name') || '').toLowerCase();
+
+            if (fiscalName.includes(searchTerm)) {
+                item.style.display = 'grid';
                 hasResults = true;
             } else {
                 item.style.display = 'none';
             }
         });
 
-        noResults.classList.toggle('hidden', hasResults || searchTerm === '');
+        if (noResults) {
+            noResults.classList.toggle('hidden', hasResults || searchTerm === '');
+        }
     });
 }
 

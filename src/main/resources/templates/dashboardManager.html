@@ -73,7 +73,7 @@
 
         <div id="fiscalList" class="max-w-full max-h-96 overflow-x-auto overflow-y-auto mr-1">
             <div th:each="fiscal : ${fiscais}"
-                 class="grid grid-cols-[minmax(200px,1fr)_auto] items-center p-2 border-b border-gray-150 hover:bg-gray-100 rounded-md">
+                 class="fiscal-item grid grid-cols-[minmax(200px,1fr)_auto] items-center p-2 border-b border-gray-150 hover:bg-gray-100 rounded-md" th:attr="data-name=${fiscal.fullName()}">
 
                 <!-- Dados do Fiscal -->
                 <div class="flex-1 min-w-0">
