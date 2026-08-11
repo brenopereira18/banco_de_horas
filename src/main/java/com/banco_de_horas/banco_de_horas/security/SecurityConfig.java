@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
                 .requestMatchers("/controle_de_folgas/dashboard/esqueci-senha").permitAll()
                 .requestMatchers("/controle_de_folgas/dashboard/reset-senha").permitAll()
-                .requestMatchers("/controle_de_folgas/dashboard/administrador/**").hasRole("ADMINISTRADOR")
+                .requestMatchers("/controle_de_folgas/dashboard/administrador/**").hasAnyRole("ADMINISTRADOR_SUPERVISOR", "ADMINISTRADOR_FISCAL")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

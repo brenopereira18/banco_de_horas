@@ -91,8 +91,8 @@ public class TaxEntity implements UserDetails {
      */
     public long getBalanceInDays() {
         BigDecimal hoursPerDay = switch (userType) {
-            case FISCAL -> BigDecimal.valueOf(6);
-            case SUPERVISOR, ADMINISTRADOR -> BigDecimal.valueOf(8);
+            case FISCAL, ADMINISTRADOR_FISCAL -> BigDecimal.valueOf(6);
+            case SUPERVISOR, ADMINISTRADOR_SUPERVISOR -> BigDecimal.valueOf(8);
         };
 
         return balanceOfHours

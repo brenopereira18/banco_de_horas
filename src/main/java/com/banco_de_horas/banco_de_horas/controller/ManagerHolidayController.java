@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/controle_de_folgas/dashboard")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMINISTRADOR')")
+@PreAuthorize("hasAnyRole('ADMINISTRADOR_SUPERVISOR', 'ADMINISTRADOR_FISCAL')")
 public class ManagerHolidayController {
 
     private final HolidayService holidayService;

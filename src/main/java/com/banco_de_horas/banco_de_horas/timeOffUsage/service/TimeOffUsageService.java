@@ -185,8 +185,8 @@ public class TimeOffUsageService {
     // Fiscal tem jornada de 6h, supervisor e administrador de 8h
     private BigDecimal getDailyLimit(TaxEntity tax) {
         return switch (tax.getUserType()) {
-            case FISCAL -> BigDecimal.valueOf(6);
-            case SUPERVISOR, ADMINISTRADOR -> BigDecimal.valueOf(8);
+            case FISCAL, ADMINISTRADOR_FISCAL -> BigDecimal.valueOf(6);
+            case SUPERVISOR, ADMINISTRADOR_SUPERVISOR -> BigDecimal.valueOf(8);
         };
     }
 

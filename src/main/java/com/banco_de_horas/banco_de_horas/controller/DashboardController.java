@@ -33,7 +33,7 @@ public class DashboardController {
         return "login";
     }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR_SUPERVISOR', 'ADMINISTRADOR_FISCAL')")
     @GetMapping("/administrador")
     public String showDashboard(
         Model model,
@@ -61,7 +61,10 @@ public class DashboardController {
 
         boolean isAdmin = authentication != null &&
             authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"));
+                .anyMatch(a ->
+                    a.getAuthority().equals("ROLE_ADMINISTRADOR_SUPERVISOR") ||
+                        a.getAuthority().equals("ROLE_ADMINISTRADOR_FISCAL")
+                );
 
         Page<MonthlyWorkItemDTO> worksPage = workService.getAllWorks(tax, page, 10);
         Page<MonthlyTimeOffUsageItemDTO> timeOffUsagePage = timeOffUsageService.getAllTimeUsage(tax, timeOffPage, 10);
