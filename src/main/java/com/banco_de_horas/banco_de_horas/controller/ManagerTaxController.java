@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @Controller
 @RequestMapping("/controle_de_folgas/dashboard/administrador")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMINISTRADOR')")
+@PreAuthorize("hasAnyRole('ADMINISTRADOR_SUPERVISOR', 'ADMINISTRADOR_FISCAL')")
 public class ManagerTaxController {
 
     private final TaxService taxService;

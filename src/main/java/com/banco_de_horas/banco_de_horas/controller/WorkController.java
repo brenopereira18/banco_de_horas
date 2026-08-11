@@ -22,7 +22,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/controle_de_folgas/dashboard/fiscal")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMINISTRADOR')")
+@PreAuthorize("hasAnyRole('ADMINISTRADOR_SUPERVISOR', 'ADMINISTRADOR_FISCAL')")
 public class WorkController {
 
     private final WorkService workService;
